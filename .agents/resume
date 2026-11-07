@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Dependencies are retained in the snapshot. There are no shared services or
+# authentication steps to repair, and waking an orb must not reinstall packages.
+printf 'Orb ready: use each Python demo\x27s .venv and its local npm scripts.\n'

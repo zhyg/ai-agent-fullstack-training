@@ -4,3 +4,5 @@ ex_ctx/*
 node_modules/
 dist/
 __pycache__/
+.venv/
+.amp/portals/*

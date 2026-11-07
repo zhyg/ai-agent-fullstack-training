@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+export CI=1
+export npm_config_audit=false npm_config_fund=false
+export UV_PYTHON_DOWNLOADS=automatic
+
+step() {
+  local label="$1"
+  shift
+  printf '\n==> %s\n' "$label"
+  time "$@"
+}
+
+# The orb base image provides Node and uv. Fail clearly if its toolchain drifts.
+node -e 'if (+process.versions.node.split(".")[0] < 22 || (process.versions.node.startsWith("22.") && +process.versions.node.split(".")[1] < 19)) throw new Error("Node >=22.19 is required")'
+uv --version
+
+# Each lesson owns its dependencies. The commerce examples are one npm workspace;
+# installing their root lockfile also installs all eight web applications.
+# Existing lesson locks omit optional peer resolutions (notably esbuild). Match
+# that layout rather than rewriting the course lockfiles during orb startup.
+# Measured warm npm ci still takes about 45 seconds across the lessons because
+# it deletes node_modules. Reuse a completed install only for identical inputs.
+toolchain="$(node --version) $(npm --version) legacy-peer-deps"
+while IFS= read -r lockfile; do
+  directory="$(dirname "$lockfile")"
+  fingerprint="$(
+    {
+      printf '%s\n' "$toolchain"
+      sha256sum "$lockfile"
+      git ls-files -z "$directory/package.json" "$directory/**/package.json" | xargs -0 sha256sum
+    } | sha256sum
+  )"
+  marker="$directory/node_modules/.amp-setup-fingerprint"
+  if [[ -f "$marker" && "$(cat "$marker")" == "$fingerprint" ]]; then
+    printf '\n==> npm: %s (unchanged)\n' "$directory"
+    continue
+  fi
+  step "npm: $directory" npm ci --prefix "$directory" --prefer-offline --legacy-peer-deps
+  printf '%s\n' "$fingerprint" > "$marker"
+done < <(git ls-files 'course_code/**/package-lock.json')
+
+# These intentionally small bug-fix fixtures have no committed lockfile.
+for directory in course_code/week{03/3-7/project3,04/4-6/project4}/samples/2_bug_fix/demo-app; do
+  step "npm: $directory (unlocked fixture)" npm install --prefix "$directory" --package-lock=false --prefer-offline
+done
+
+step 'Python: llm-gateway (locked, including test tools)' \
+  uv sync --project course_code/week01/1-7/llm-gateway --locked --extra dev --python 3.11
+
+while IFS= read -r requirements; do
+  directory="$(dirname "$requirements")"
+  # A dev requirements file may include the runtime file (commerce/pipeline),
+  # or only add test tools (project3/project4); pass both in either case.
+  args=(-r requirements.txt)
+  if [[ -f "$directory/requirements-dev.txt" ]]; then
+    args+=(-r requirements-dev.txt)
+  fi
+  (
+    cd "$directory"
+    if [[ ! -x .venv/bin/python ]]; then
+      step "Python venv: $directory" uv venv --python 3.11 .venv
+    fi
+    step "Python dependencies: $directory" uv pip install --python .venv/bin/python "${args[@]}"
+  )
+done < <(git ls-files 'course_code/**/requirements.txt')
+
+printf '\nSetup complete. Python demos use their local .venv/bin/python.\n'
+printf 'API-backed demos still need your own credentials; no services were started.\n'
