@@ -1,0 +1,431 @@
+{
+  "source": "https://u.geekbang.org/review/lesson/899?article=1009056&class_sku=101178602",
+  "retrieved_date": "2026-11-07",
+  "timezone": "Asia/Singapore",
+  "course": "AI Agent 全栈工程师训练营",
+  "total": 32,
+  "pagination": {
+    "page_size": 20,
+    "page_counts": [
+      20,
+      12,
+      0
+    ],
+    "unique_records": 32,
+    "page1_rechecked": true
+  },
+  "items": [
+    {
+      "order": 1,
+      "page": 1.0,
+      "name": "此时此刻的我",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/chenguox/llm-gateway",
+      "links": [
+        "https://github.com/chenguox/llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/3184098?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020108"
+    },
+    {
+      "order": 2,
+      "page": 1.0,
+      "name": "文森特没有眼泪",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/zhaiwenjia/fullstack-agent-system",
+      "links": [
+        "https://github.com/zhaiwenjia/fullstack-agent-system"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1584477?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G19709955040017"
+    },
+    {
+      "order": 3,
+      "page": 1.0,
+      "name": "白宇",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/Jason-Bai/ai-agent-training/tree/main/llm-gateway",
+      "links": [
+        "https://github.com/Jason-Bai/ai-agent-training/tree/main/llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1019484?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20210579040074"
+    },
+    {
+      "order": 4,
+      "page": 1.0,
+      "name": "陈康",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/colorlesswind/llm-gateway",
+      "links": [
+        "https://github.com/colorlesswind/llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1942860?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020140"
+    },
+    {
+      "order": 5,
+      "page": 1.0,
+      "name": "xue.",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/xuejieph/ai-agent-homework/tree/main/week01",
+      "links": [
+        "https://github.com/xuejieph/ai-agent-homework/tree/main/week01"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1401364?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20235503010475"
+    },
+    {
+      "order": 6,
+      "page": 1.0,
+      "name": "昊易",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/yuantao027/llm-gateway-yt",
+      "links": [
+        "https://gitee.com/yuantao027/llm-gateway-yt"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1377176?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020041"
+    },
+    {
+      "order": 7,
+      "page": 1.0,
+      "name": "帕克",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/JeromyFarkas/myAI.git",
+      "links": [
+        "https://github.com/JeromyFarkas/myAI.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/3180270?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020116"
+    },
+    {
+      "order": 8,
+      "page": 1.0,
+      "name": "牧月",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/includeYou/AI-Agent-Training.git",
+      "links": [
+        "https://github.com/includeYou/AI-Agent-Training.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4589576?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020129"
+    },
+    {
+      "order": 9,
+      "page": 1.0,
+      "name": "fuyu-fwj",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/nd-fuyu/geek-ai/tree/master/week1/homework/llm-gateway",
+      "links": [
+        "https://gitee.com/nd-fuyu/geek-ai/tree/master/week1/homework/llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1135759?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20210447120132"
+    },
+    {
+      "order": 10,
+      "page": 1.0,
+      "name": "Geek_892920",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/huilinkf/ai-agent",
+      "links": [
+        "https://gitee.com/huilinkf/ai-agent"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4583154?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020037"
+    },
+    {
+      "order": 11,
+      "page": 1.0,
+      "name": "Y-Tracy",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/byTracyYe/geektime-ai-agent-camp/tree/master/LLM%20%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E6%9C%8D%E5%8A%A1",
+      "links": [
+        "https://gitee.com/byTracyYe/geektime-ai-agent-camp/tree/master/LLM%20%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B%E8%B0%83%E7%94%A8%E6%9C%8D%E5%8A%A1"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1179396?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20200343030401"
+    },
+    {
+      "order": 12,
+      "page": 1.0,
+      "name": "Geek_db9632",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/cj841192685/AI-Agent-Fullstack-Bootcamp/tree/main/01",
+      "links": [
+        "https://github.com/cj841192685/AI-Agent-Fullstack-Bootcamp/tree/main/01"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4569924?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020012"
+    },
+    {
+      "order": 13,
+      "page": 1.0,
+      "name": "hush",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/1qq-1233/week_01",
+      "links": [
+        "https://github.com/1qq-1233/week_01"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4588823?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020109"
+    },
+    {
+      "order": 14,
+      "page": 1.0,
+      "name": "王泽文",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/sdwazhian/ai-agent.git",
+      "links": [
+        "https://gitee.com/sdwazhian/ai-agent.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/2696086?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20246373020123"
+    },
+    {
+      "order": 15,
+      "page": 1.0,
+      "name": "芝士嘉年华",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/llinden/llm-gateway-mini",
+      "links": [
+        "https://gitee.com/llinden/llm-gateway-mini"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1555056?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20258465020022"
+    },
+    {
+      "order": 16,
+      "page": 1.0,
+      "name": "Geek_b1787b",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/kk375/ai_coding_1.git  homework-llmgateway分支",
+      "links": [
+        "https://gitee.com/kk375/ai_coding_1.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1721349?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020111"
+    },
+    {
+      "order": 17,
+      "page": 1.0,
+      "name": "闲着也是闲着",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/CwjXFH/AgentCode/tree/master/llmgateway",
+      "links": [
+        "https://github.com/CwjXFH/AgentCode/tree/master/llmgateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1012325?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020054"
+    },
+    {
+      "order": 18,
+      "page": 1.0,
+      "name": "问。",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/tony_tang_x/learnagent",
+      "links": [
+        "https://gitee.com/tony_tang_x/learnagent"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1933417?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20261786020031"
+    },
+    {
+      "order": 19,
+      "page": 1.0,
+      "name": "梦幻若水",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/menghaibin2009/llmgateway",
+      "links": [
+        "https://gitee.com/menghaibin2009/llmgateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1739275?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20190343020090"
+    },
+    {
+      "order": 20,
+      "page": 1.0,
+      "name": "ming",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/rxm9010/my-llm-gateway.git",
+      "links": [
+        "https://github.com/rxm9010/my-llm-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1213232?lesson=899&article=1009056&page=1&size=20&status=0",
+      "student_no": "G20247674020017"
+    },
+    {
+      "order": 21,
+      "page": 2.0,
+      "name": "login",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/xiliang2022/my-agent/blob/master/.idea/inspectionProfiles/profiles_settings.xml",
+      "links": [
+        "https://gitee.com/xiliang2022/my-agent/blob/master/.idea/inspectionProfiles/profiles_settings.xml"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1057446?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020019"
+    },
+    {
+      "order": 22,
+      "page": 2.0,
+      "name": "Geek_307a9f",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/lyxv587/agent.git",
+      "links": [
+        "https://gitee.com/lyxv587/agent.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4586123?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020067"
+    },
+    {
+      "order": 23,
+      "page": 2.0,
+      "name": "灿若繁星先生",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/canyuda/agentStudyCodeProject/tree/main/homework/my-llm-gateway\n\n还新加了脱敏功能, 通过规则找敏感信息, 换成填充词, 模型返回后, 再把填充词替换回来(模仿magpie的脱敏功能)",
+      "links": [
+        "https://github.com/canyuda/agentStudyCodeProject/tree/main/homework/my-llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1209539?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20210579070203"
+    },
+    {
+      "order": 24,
+      "page": 2.0,
+      "name": "〝我是智仔",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/young-adults/llm-gateway.git",
+      "links": [
+        "https://gitee.com/young-adults/llm-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4574943?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786010584"
+    },
+    {
+      "order": 25,
+      "page": 2.0,
+      "name": "程序猿佬鸟",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "1. 项目地址\nhttps://github.com/TomYang1024/gateway\n2. 项目README 文档\nhttps://github.com/TomYang1024/gateway/blob/main/README.md",
+      "links": [
+        "https://github.com/TomYang1024/gateway",
+        "https://github.com/TomYang1024/gateway/blob/main/README.md"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1483844?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020083"
+    },
+    {
+      "order": 26,
+      "page": 2.0,
+      "name": "Vita",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/vita__chaochao/my-knowlege/blob/master/week1%E4%BD%9C%E4%B8%9A.docx",
+      "links": [
+        "https://gitee.com/vita__chaochao/my-knowlege/blob/master/week1%E4%BD%9C%E4%B8%9A.docx"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1372593?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20210607020285"
+    },
+    {
+      "order": 27,
+      "page": 2.0,
+      "name": "じ☆v云影寒",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/yunyinghan/agent_stream_gateway",
+      "links": [
+        "https://gitee.com/yunyinghan/agent_stream_gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1118076?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020044"
+    },
+    {
+      "order": 28,
+      "page": 2.0,
+      "name": "魂痴冬冬",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/HunCiDD/jksj-aiagent/tree/master/week01/llm-gateway",
+      "links": [
+        "https://github.com/HunCiDD/jksj-aiagent/tree/master/week01/llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1915962?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20210735010342"
+    },
+    {
+      "order": 29,
+      "page": 2.0,
+      "name": "王方",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/king2fang/streaming-agent-gateway.git",
+      "links": [
+        "https://github.com/king2fang/streaming-agent-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4588001?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020121"
+    },
+    {
+      "order": 30,
+      "page": 2.0,
+      "name": "Geek_122fe2",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/shanli/agent-dev/tree/main/work/01/homework",
+      "links": [
+        "https://github.com/shanli/agent-dev/tree/main/work/01/homework"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1146756?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20210776010372"
+    },
+    {
+      "order": 31,
+      "page": 2.0,
+      "name": "Sunny",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/futokorogin/h1-llm-gateway\n\n（需要中文readme的話請換到gitee branch）",
+      "links": [
+        "https://gitee.com/futokorogin/h1-llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4583024?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20261786020038"
+    },
+    {
+      "order": 32,
+      "page": 2.0,
+      "name": "Kevin",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/huangke0802/agent-training/tree/master/homework/week01",
+      "links": [
+        "https://gitee.com/huangke0802/agent-training/tree/master/homework/week01"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1923859?lesson=899&article=1009056&page=2&size=20&status=0",
+      "student_no": "G20200447020141"
+    }
+  ],
+  "assignment_menu": [
+    {
+      "title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1009056&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业四：为 pi 增加项目长期记忆【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1028370&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业二：为治理框架增加“转账”工具【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025885&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业三：基于 smolagents 实现 Guarded Harness【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025938&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "全部作业",
+      "url": "https://u.geekbang.org/review/lesson/899?article=0&class_sku=101178602",
+      "is_aggregate": true
+    }
+  ]
+}
