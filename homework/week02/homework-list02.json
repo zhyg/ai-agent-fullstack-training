@@ -1,0 +1,84 @@
+{
+  "source": "https://u.geekbang.org/review/lesson/899?article=1025885&class_sku=101178602",
+  "retrieved_at": "2026-11-08T11:06:19.0000000+08:00",
+  "retrieved_date": "2026-11-08",
+  "course": "AI Agent 全栈工程师训练营",
+  "assignment_title": "作业二：为治理框架增加“转账”工具【必须完成】",
+  "scope": "当前作业二（article=1025885），全部状态，不限提交日期；按页面请求原顺序",
+  "method": "本机 opencli 2.0.2 + 已登录 Chrome；页面正文未正常渲染，读取该页实际列表请求，并在同一 Chrome 会话中验证后页与复查首页",
+  "total": 2,
+  "reported_total": 2,
+  "pagination": {
+    "page_counts": [
+      2,
+      0
+    ],
+    "unique_records": 2,
+    "first_page_rechecked": true
+  },
+  "completeness": {
+    "complete": true,
+    "issues": [],
+    "termination": {
+      "kind": "empty_page",
+      "evidence": "在相同班级、题目、size=20、status=0 下实际读取第2页，返回空列表且total=2"
+    }
+  },
+  "assignment_menu": [
+    {
+      "title": "全部作业",
+      "url": "https://u.geekbang.org/review/lesson/899?article=0&class_sku=101178602",
+      "is_aggregate": true
+    },
+    {
+      "title": "作业三：基于 smolagents 实现 Guarded Harness【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025938&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业二：为治理框架增加“转账”工具【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025885&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业四：为 pi 增加项目长期记忆【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1028370&class_sku=101178602",
+      "is_aggregate": false
+    },
+    {
+      "title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1009056&class_sku=101178602",
+      "is_aggregate": false
+    }
+  ],
+  "items": [
+    {
+      "order": 1,
+      "page": 1,
+      "record_key": "899:1025885:19321",
+      "name": "Vita",
+      "student_no": "G20210607020285",
+      "assignment_title": "作业二：为治理框架增加“转账”工具【必须完成】",
+      "content": "https://gitee.com/vita__chaochao/week2",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/vita__chaochao/week2"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1372593?lesson=899&article=1025885&page=1&size=20&status=0"
+    },
+    {
+      "order": 2,
+      "page": 1,
+      "record_key": "899:1025885:19296",
+      "name": "Kevin",
+      "student_no": "G20200447020141",
+      "assignment_title": "作业二：为治理框架增加“转账”工具【必须完成】",
+      "content": "https://gitee.com/huangke0802/agent-training/tree/master/homework/week02",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/huangke0802/agent-training/tree/master/homework/week02"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1923859?lesson=899&article=1025885&page=1&size=20&status=0"
+    }
+  ]
+}
