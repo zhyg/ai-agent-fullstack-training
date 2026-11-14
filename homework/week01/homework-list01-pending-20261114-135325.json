@@ -1,0 +1,373 @@
+{
+  "source": "https://u.geekbang.org/review/lesson/899?article=1009056&class_sku=101178602",
+  "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+  "scope": "作业一；仅已提交（1）和批改后已提交（2）；不限日期；排除已批改（8）",
+  "method": "本机 opencli + Chrome；页面筛选及实际加载的只读列表服务，逐状态分页并复查第一页",
+  "assignment_menu": [
+    {
+      "is_aggregate": true,
+      "title": "全部作业",
+      "url": "https://u.geekbang.org/review/lesson/899?article=0&class_sku=101178602"
+    },
+    {
+      "is_aggregate": false,
+      "title": "作业三：基于 smolagents 实现 Guarded Harness【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025938&class_sku=101178602"
+    },
+    {
+      "is_aggregate": false,
+      "title": "作业五：实现 Agent 对话轨迹图可视化【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1033055&class_sku=101178602"
+    },
+    {
+      "is_aggregate": false,
+      "title": "作业二：为治理框架增加“转账”工具【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1025885&class_sku=101178602"
+    },
+    {
+      "is_aggregate": false,
+      "title": "作业四：为 pi 增加项目长期记忆【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1028370&class_sku=101178602"
+    },
+    {
+      "is_aggregate": false,
+      "title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "url": "https://u.geekbang.org/review/lesson/899?article=1009056&class_sku=101178602"
+    }
+  ],
+  "retrieved_at": "2026-11-14T13:53:25+08:00",
+  "course": "AI Agent 全栈工程师训练营(第2期)",
+  "retrieved_date": "2026-11-14",
+  "total": 11,
+  "reported_total": 11,
+  "status_counts": {
+    "已提交": 10,
+    "批改后已提交": 1
+  },
+  "pagination": {
+    "page_size": 20,
+    "by_status": [
+      {
+        "status": 1,
+        "status_label": "已提交",
+        "reported_total": 10,
+        "page_counts": [
+          10,
+          0
+        ],
+        "first_page_recheck": {
+          "record_keys": [
+            "899:1009056:19415",
+            "899:1009056:19397",
+            "899:1009056:19395",
+            "899:1009056:19393",
+            "899:1009056:19390",
+            "899:1009056:19381",
+            "899:1009056:19377",
+            "899:1009056:19372",
+            "899:1009056:19370",
+            "899:1009056:19369"
+          ],
+          "total": 10
+        },
+        "completeness": {
+          "complete": true,
+          "issues": [],
+          "termination": {
+            "evidence": "按当前页面列表服务读取到下一页为空；页面筛选下一页也已禁用",
+            "kind": "empty_page"
+          }
+        }
+      },
+      {
+        "status": 2,
+        "status_label": "批改后已提交",
+        "reported_total": 1,
+        "page_counts": [
+          1,
+          0
+        ],
+        "first_page_recheck": {
+          "record_keys": [
+            "899:1009056:19396"
+          ],
+          "total": 1
+        },
+        "completeness": {
+          "complete": true,
+          "issues": [],
+          "termination": {
+            "evidence": "按当前页面列表服务读取到下一页为空；页面筛选下一页也已禁用",
+            "kind": "empty_page"
+          }
+        }
+      }
+    ],
+    "unique_records": 11,
+    "first_page_rechecked": true,
+    "ordering": "保留列表提交时间倒序；合并后顺序与首次页面中两种状态的相对顺序一致"
+  },
+  "completeness": {
+    "complete": true,
+    "issues": [],
+    "termination": {
+      "kind": "per_status_empty_page",
+      "evidence": "两个筛选均核对第一页、下一空页、总数和第一页复查顺序；记录ID无重复"
+    }
+  },
+  "items": [
+    {
+      "order": 1,
+      "page": 1,
+      "record_key": "899:1009056:19415",
+      "name": "Cody",
+      "student_no": "G20261786020029",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/yuanwenlou/ai-agent-week01-llm-gateway",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/yuanwenlou/ai-agent-week01-llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4578893?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19415,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 4578893,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794622163,
+      "submitted_at": "2026-11-14T10:09:23+08:00"
+    },
+    {
+      "order": 2,
+      "page": 1,
+      "record_key": "899:1009056:19397",
+      "name": "小目标大成就",
+      "student_no": "G20261786010571",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/libuzuan/mini-llm-gateway",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/libuzuan/mini-llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4574841?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19397,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 4574841,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794389511,
+      "submitted_at": "2026-11-11T17:31:51+08:00"
+    },
+    {
+      "order": 3,
+      "page": 1,
+      "record_key": "899:1009056:19396",
+      "name": "hush",
+      "student_no": "G20261786020109",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/1qq-1233/LLM_gateway",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/1qq-1233/LLM_gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4588823?lesson=899&article=1009056&page=1&size=20&status=2",
+      "id": 19396,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 4588823,
+      "status": 2,
+      "status_label": "批改后已提交",
+      "times": 2,
+      "sub_time": 1794383083,
+      "submitted_at": "2026-11-11T15:44:43+08:00"
+    },
+    {
+      "order": 4,
+      "page": 1,
+      "record_key": "899:1009056:19395",
+      "name": "风间",
+      "student_no": "G20261786010617",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/beyondor/my-mini-llm-gateway",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/beyondor/my-mini-llm-gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1610013?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19395,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 1610013,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794364211,
+      "submitted_at": "2026-11-11T10:30:11+08:00"
+    },
+    {
+      "order": 5,
+      "page": 1,
+      "record_key": "899:1009056:19393",
+      "name": "之虎者也",
+      "student_no": "G20261930010051",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/helloTigerR/Tiger-AgentProjects",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/helloTigerR/Tiger-AgentProjects"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/2347624?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19393,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 2347624,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794334206,
+      "submitted_at": "2026-11-11T02:10:06+08:00"
+    },
+    {
+      "order": 6,
+      "page": 1,
+      "record_key": "899:1009056:19390",
+      "name": "Geek_cd851a",
+      "student_no": "G19701786020176",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/Newbeeffy/llm-gateway.git",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/Newbeeffy/llm-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4593221?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19390,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 4593221,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794309629,
+      "submitted_at": "2026-11-10T19:20:29+08:00"
+    },
+    {
+      "order": 7,
+      "page": 1,
+      "record_key": "899:1009056:19381",
+      "name": "。",
+      "student_no": "G20261786020088",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/BboyXing/AI-Agent/tree/main/01%20LLM%20Gateway/llm_gateway",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/BboyXing/AI-Agent/tree/main/01%20LLM%20Gateway/llm_gateway"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/4504023?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19381,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 4504023,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794212103,
+      "submitted_at": "2026-11-09T16:15:03+08:00"
+    },
+    {
+      "order": 8,
+      "page": 1,
+      "record_key": "899:1009056:19377",
+      "name": "风禾尽起",
+      "student_no": "G20261786010616",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/wujingin/mini-llm-gateway.git",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/wujingin/mini-llm-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/2719052?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19377,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 2719052,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794202817,
+      "submitted_at": "2026-11-09T13:40:17+08:00"
+    },
+    {
+      "order": 9,
+      "page": 1,
+      "record_key": "899:1009056:19372",
+      "name": "yiwei.zhou",
+      "student_no": "G20261786010620",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://gitee.com/zhouywjava/llmgateway.git",
+      "summary": "仅提交链接",
+      "links": [
+        "https://gitee.com/zhouywjava/llmgateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1508854?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19372,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 1508854,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794147326,
+      "submitted_at": "2026-11-08T22:15:26+08:00"
+    },
+    {
+      "order": 10,
+      "page": 1,
+      "record_key": "899:1009056:19370",
+      "name": "nakayama",
+      "student_no": "G20261786020151",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/Waterx/xueAI",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/Waterx/xueAI"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1994612?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19370,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 1994612,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794143710,
+      "submitted_at": "2026-11-08T21:15:10+08:00"
+    },
+    {
+      "order": 11,
+      "page": 1,
+      "record_key": "899:1009056:19369",
+      "name": "雷锋剑",
+      "student_no": "G20261786020013",
+      "assignment_title": "作业一：LLM 统一模型调用服务【必须完成】",
+      "content": "https://github.com/zheng0324jian/ai-agent-llm-gateway.git",
+      "summary": "仅提交链接",
+      "links": [
+        "https://github.com/zheng0324jian/ai-agent-llm-gateway.git"
+      ],
+      "review_detail_url": "https://u.geekbang.org/review/detail/1134717?lesson=899&article=1009056&page=1&size=20&status=1",
+      "id": 19369,
+      "class_id": 899,
+      "article_id": 1009056,
+      "user_id": 1134717,
+      "status": 1,
+      "status_label": "已提交",
+      "times": 1,
+      "sub_time": 1794140881,
+      "submitted_at": "2026-11-08T20:28:01+08:00"
+    }
+  ]
+}
