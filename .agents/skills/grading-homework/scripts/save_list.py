@@ -62,7 +62,7 @@ def main() -> None:
         f"来源：https://u.geekbang.org/review/lesson/899?article={args.article_id}&class_sku=101178602",
         f"采集时间：{now.isoformat(timespec='seconds')}",
         f"方法：`uv run scripts/get_homework_user_list.py --article-id {args.article_id} --page N`，逐页直到空页。",
-        "范围：status=0；脚本排除 status=8（已批改）。",
+        "范围：查询 status=0，平台返回全部记录；脚本再排除 status=8（已批改），快照只留 1（已提交）和 2（批改后提交）。",
         f"记录数：{len(users)}；各页数量：{counts}", "",
         "| 序号 | 学员 | 学号 | 记录 | 状态 | 链接 |", "|---:|---|---|---:|---:|---|",
     ]
