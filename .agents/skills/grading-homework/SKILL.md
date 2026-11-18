@@ -73,7 +73,7 @@ uv run scripts/update_homework_correct.py --week week02 --article-id 1025885
 uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --apply
 ```
 
-只提交 `homework/<周>/<学号>.md`。反馈首行必须有 `<!-- submission:记录号 -->`；缺少时脚本退出且不提交。平台记录与本地等级、评语一致时跳过。暂评、待评或不计分会跳过，需用户决定后再处理。
+只提交 `homework/<周>/<学号>.md`。反馈首行必须有 `<!-- submission:记录号 -->`；缺少时脚本退出且不提交。平台记录与本地等级、评语一致时跳过。暂评分数按同一分段映射，0 分是不及格；未计分会跳过，需用户决定后再处理。
 
 ## 7. 报告
 
