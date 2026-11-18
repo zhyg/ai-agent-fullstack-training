@@ -66,14 +66,7 @@ python .agents/skills/grading-homework/scripts/archive.py --week week02 --list h
 
 ## 6. 更新到平台
 
-用户明确要求把批改记录更新到系统时才执行。先预览，再提交：
-
-```bash
-uv run scripts/update_homework_correct.py --week week02 --article-id 1025885
-uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --apply
-```
-
-只提交 `homework/<周>/<学号>.md`。反馈首行必须有 `<!-- submission:记录号 -->`；缺少时脚本退出且不提交。平台记录与本地等级、评语一致时跳过。暂评分数按同一分段映射，0 分是不及格；未计分会跳过，需用户决定后再处理。
+用户明确要求把批改记录更新到系统时，加载 `updating-homework-corrections` 并按其流程执行。
 
 ## 7. 报告
 
