@@ -81,15 +81,40 @@ def parse_feedback(path: Path) -> dict:
     }
 
 
+def submission_feedback(week_dir: Path, student_no: str) -> Path | None:
+    """学号同名文件没有记录号时，用该学号带记录号的后续提交。"""
+    marked = sorted(week_dir.glob(f"{student_no}-submission*.md"))
+    marked = [path for path in marked if SUBMISSION.match(path.read_text(encoding="utf-8"))]
+    if len(marked) == 1:
+        return marked[0]
+    return None
+
+
 def load_feedbacks(week_dir: Path, selected: set[str]) -> tuple[dict[str, tuple[Path, dict]], list[str]]:
     found, skipped = {}, []
     for path in sorted(week_dir.glob("G*.md")):
-        if not STUDENT_NO.fullmatch(path.stem) or (selected and path.stem not in selected):
+        student_no = path.stem.split("-")[0]
+        if not STUDENT_NO.fullmatch(student_no) or path.stem != student_no:
+            continue
+        if selected and student_no not in selected:
             continue
         try:
-            found[path.stem] = (path, parse_feedback(path))
+            feedback = parse_feedback(path)
         except ValueError as exc:
             skipped.append(f"{path.relative_to(week_dir.parent.parent)}：{exc}")
+            continue
+        if feedback["record_id"] is None:
+            later = submission_feedback(week_dir, student_no)
+            if later is None:
+                found[student_no] = (path, feedback)
+                continue
+            try:
+                feedback = parse_feedback(later)
+            except ValueError as exc:
+                skipped.append(f"{later.relative_to(week_dir.parent.parent)}：{exc}")
+                continue
+            path = later
+        found[student_no] = (path, feedback)
     return found, skipped
 
 
@@ -121,14 +146,19 @@ def request_json(cookie: str, url: str, payload: dict, referer: str) -> dict:
     return result
 
 
-def list_submissions(cookie: str, article_id: int, class_id: int) -> list[dict]:
+# 平台 status 8 是已批改。status=0 的列表包含全部记录，每条自带当前 status，
+# 所以按记录号核实以这份列表为准，不另查 status=8，避免同一记录匹配到两次。
+CORRECTED_STATUS = 8
+
+
+def list_submissions(cookie: str, article_id: int, class_id: int, status: int) -> list[dict]:
     referer = f"{ORIGIN}/review/lesson/{class_id}?article={article_id}&class_sku={CLASS_SKU}"
     records, page = [], 1
     while True:
         result = request_json(cookie, LIST_URL, {
             "size": 50,
             "page": page,
-            "status": 0,
+            "status": status,
             "class_id": class_id,
             "article_id": article_id,
         }, referer)
@@ -162,6 +192,11 @@ def main() -> int:
     parser.add_argument("--class-id", "--class_id", type=positive_int, default=899)
     parser.add_argument("--student-no", action="append", default=[], help="只处理该学号，可重复")
     parser.add_argument("--apply", action="store_true", help="提交到平台；省略时只预览")
+    parser.add_argument(
+        "--include-corrected",
+        action="store_true",
+        help="连已批改（status 8）的记录也提交；默认核实后跳过",
+    )
     args = parser.parse_args()
     if not re.fullmatch(r"week\d{2}", args.week):
         parser.error("--week 必须形如 week02")
@@ -184,7 +219,7 @@ def main() -> int:
         print(f"准备失败：{exc}", file=sys.stderr)
         return 1
 
-    unknown = sorted(selected - feedbacks.keys() - {item.split("/")[-1].split(".")[0] for item in skipped})
+    unknown = sorted(selected - feedbacks.keys() - {item.split("/")[-1].split(".")[0].split("-")[0] for item in skipped})
     if unknown:
         print(f"准备失败：没有这些学号的反馈：{', '.join(unknown)}", file=sys.stderr)
         return 1
@@ -199,11 +234,12 @@ def main() -> int:
         return 1
 
     try:
-        records = list_submissions(cookie, args.article_id, args.class_id)
+        records = list_submissions(cookie, args.article_id, args.class_id, 0)
     except RuntimeError as exc:
         print(f"准备失败：{exc}", file=sys.stderr)
         return 1
     failures = 0
+    skipped_corrected = 0
 
     referer = (
         f"{ORIGIN}/review/lesson/{args.class_id}?article={args.article_id}&class_sku={CLASS_SKU}"
@@ -218,6 +254,10 @@ def main() -> int:
             continue
         record_id = record["id"]
         label = f"{student_no} / {record_id} {feedback['level_name']}{feedback['score']}"
+        if record.get("status") == CORRECTED_STATUS and not args.include_corrected:
+            print(f"SKIP {label}：平台记录已批改（status {CORRECTED_STATUS}）")
+            skipped_corrected += 1
+            continue
         if same_correction(record, feedback["level"], feedback["remark"]):
             print(f"SKIP {label}：平台记录已一致")
             continue
@@ -234,6 +274,8 @@ def main() -> int:
         except RuntimeError as exc:
             print(f"FAIL {label}：{exc}")
             failures += 1
+    if skipped_corrected and not failures:
+        print(f"已跳过 {skipped_corrected} 条已批改记录；需要覆盖时加 --include-corrected")
     return 1 if failures else 0
 
 

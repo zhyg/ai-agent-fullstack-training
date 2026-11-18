@@ -17,7 +17,7 @@ description: 把已归档的学员反馈回填到极客时间作业批改系统�
    ```
 
    只处理部分学员时重复 `--student-no`。向用户列出学号、记录号、等级和将提交或跳过的原因。用户要求看 body 时，说明该 body 由脚本从对应反馈生成，不另写一套编码。
-3. 用户明确说提交后才加 `--apply`。提交后用作业列表接口读回该记录，核对 `status`、`correct_level` 和 `correct_remark` 与本地反馈一致，再报告结果。
+3. 用户明确说提交后才加 `--apply`。提交前脚本按反馈里的记录号核实平台当前状态：`status` 为 8（已批改）的记录默认跳过，不提交。用户明确要求覆盖已批改记录时才加 `--include-corrected`。提交后用作业列表接口读回该记录，核对 `status`、`correct_level` 和 `correct_remark` 与本地反馈一致，再报告结果。
 4. 不自动 `git commit` 或 `git push`。用户说“提交并推送”时，只暂存本次脚本和说明改动，`git diff --cached --check` 通过后提交、推送当前分支，并订阅该提交的 CI。
 
 ## 停下来问用户
