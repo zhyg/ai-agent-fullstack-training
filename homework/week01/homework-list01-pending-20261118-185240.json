@@ -1,0 +1,44 @@
+[
+  {
+    "id": 19471,
+    "content": "https://gitee.com/zs888/geek-homework/tree/main/chapter01-homework",
+    "status": 1,
+    "name": "Yolo",
+    "student_no": "G19701786020210"
+  },
+  {
+    "id": 19447,
+    "content": "https://gitee.com/jensenxiao/agentdev/tree/master/W1",
+    "status": 1,
+    "name": "jensen",
+    "student_no": "G20247585010117"
+  },
+  {
+    "id": 19445,
+    "content": "https://github.com/Aaronsi/llm-gateway.git",
+    "status": 1,
+    "name": "Aaron",
+    "student_no": "G20250805010079"
+  },
+  {
+    "id": 19441,
+    "content": "https://gitee.com/libuzuan/mini-llm-gateway，针对老师提到的不足之处进行了相关修复优化。",
+    "status": 2,
+    "name": "小目标大成就",
+    "student_no": "G20261786010571"
+  },
+  {
+    "id": 19422,
+    "content": "https://github.com/MaiLeyi/MLL-LLM-GATEWAY",
+    "status": 1,
+    "name": "周乐",
+    "student_no": "G20261786020081"
+  },
+  {
+    "id": 19420,
+    "content": "https://gitee.com/have-a-nice-weekend121/llm-gateway.git",
+    "status": 1,
+    "name": "周一打哈欠",
+    "student_no": "G20261786020086"
+  }
+]
