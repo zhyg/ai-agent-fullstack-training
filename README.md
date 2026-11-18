@@ -25,3 +25,48 @@ Setup does not start demo servers, seed databases, download embedding models, or
 configure API credentials. Supply credentials and runtime configuration as described
 in each demo's README; do not commit secrets. No external database is required for
 installation: the examples use local files, SQLite, or Milvus Lite.
+
+## 作业批改 Skill
+
+仓库内置 Amp skill [`grading-homework`](./.agents/skills/grading-homework/SKILL.md)，用于获取某周作业的提交列表，并按本周评分标准逐份批改、归档。
+
+### 使用前准备
+
+- 在 Amp 个人 Secrets & Env Vars 中配置 `GEEKBANG_COOKIE`（极客时间登录 Cookie）。不要把 Cookie 发到对话里，也不要提交 `.env`。
+- 如需调用真实大模型，在个人 Secrets 中配置 `DEEPSEEK_API_KEY`。离线即可验收的作业不调用模型。
+- `hw-guide/<周次>/` 下已有本周评分标准（如 `第二周作业评分标准.md`）及题目附件；反馈格式遵循 `hw-guide/学员作业反馈报告模板与要求.md`。
+
+### 使用方法
+
+在 Amp 线程中提供**周次**和 **article ID**，例如：
+
+```text
+获取 week02 的作业列表并批改，article=1025885
+```
+
+只获取列表、暂不批改时，也可以直接运行脚本：
+
+```bash
+python .agents/skills/grading-homework/scripts/save_list.py --week week02 --article-id 1025885
+```
+
+### 处理流程
+
+1. **获取列表**：调用 `scripts/get_homework_user_list.py`（默认 `status=0`，排除已批改的 8），逐页取到空页，另存为 `homework/<周次>/homework-list<NN>-pending-<时间戳>.{json,md}`。已有列表不会被修改。
+2. **独立批改**：每份提交新开一个 orb，克隆学员 Git 仓库，基于学员代码批改；同时最多运行 5 个。
+3. **统一复核**：主线程复核每份评分，保证同类问题在不同学员间扣分一致；必要时要求对应线程修订。
+4. **归档**：运行 `scripts/archive.py` 将结果写入 `homework/<周次>/`。
+5. **报告**：列出学员、学号、记录号、分数、等级和验收结论。
+
+### 归档规则
+
+同一学员可能多次提交作业，新的批改记录不会覆盖已有记录：
+
+| 情况 | 学员反馈 | 评分附件与证据包 |
+| --- | --- | --- |
+| 该学号本周首次批改 | `homework/<周次>/<学号>.md` | `attachments/<学号>.md`、`attachments/<学号>-evidence.tar.gz` |
+| 该学号本周已有批改 | `homework/<周次>/<学号>-submission<记录号>.md` | `attachments/<学号>-submission<记录号>.md`、`attachments/<学号>-submission<记录号>-evidence.tar.gz` |
+
+- 反馈首行记录 `<!-- submission:<记录号> -->`，已归档的记录号会自动跳过。
+- 所有文件以独占方式创建，目标已存在时直接报错，不修改任何已有文件。
+- 批改完成后**不会自动提交**；确认结果后，在线程中说“提交并推送”即可。
