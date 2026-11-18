@@ -64,7 +64,18 @@ python .agents/skills/grading-homework/scripts/archive.py --week week02 --list h
 
 归档后运行 `git status --short` 和 `git diff --name-only`：应只有新增文件，`git diff` 为空。
 
-## 6. 报告
+## 6. 更新到平台
+
+用户明确要求把批改记录更新到系统时才执行。先预览，再提交：
+
+```bash
+uv run scripts/update_homework_correct.py --week week02 --article-id 1025885
+uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --apply
+```
+
+只提交 `homework/<周>/<学号>.md`。反馈首行必须有 `<!-- submission:记录号 -->`；缺少时脚本退出且不提交。平台记录与本地等级、评语一致时跳过。暂评、待评或不计分会跳过，需用户决定后再处理。
+
+## 7. 报告
 
 - 表格列出学员、**学号**、记录号、分数、等级、验收结论，并链接到各自 `homework/<周>/` 下的反馈文件。
 - 说明暂评、需用户核实的事项，以及哪些未验证。
