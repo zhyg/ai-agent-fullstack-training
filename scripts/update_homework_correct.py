@@ -30,7 +30,7 @@ SECTIONS = ("作业优点", "作业不足", "改进方案")
 STUDENT_NO = re.compile(r"^G\d+$")
 SUBMISSION = re.compile(r"^<!-- submission:(\d+) -->\s*")
 GRADE = re.compile(
-    r"作业等级：\s*(优秀|良好|不及格)\s*[（(](?:[^）)]*?暂评)?\s*(\d+)\s*分"
+    r"作业等级：\s*(优秀|良好|不及格)\s*[（(](?:[^）)]*?暂评)?\s*(\d+(?:\.\d+)?)\s*分"
 )
 LIST_ITEM = re.compile(r"^[-*]\s+(.*)$")
 
@@ -66,7 +66,7 @@ def parse_feedback(path: Path) -> dict:
     grade = GRADE.search(text)
     if not grade:
         raise ValueError("等级必须是“优秀 / 良好 / 不及格（N分）”，未计分不能提交")
-    level_name, score = grade.group(1), int(grade.group(2))
+    level_name, score = grade.group(1), float(grade.group(2))
     expected = 8 if score >= 80 else 4 if score >= 60 else 1
     if LEVELS[level_name] != expected:
         raise ValueError(f"等级“{level_name}”与 {score} 分不一致")
