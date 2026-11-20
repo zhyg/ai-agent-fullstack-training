@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# 一键使用真实 pi coding agent + project-memory 扩展跑通作业一三步验证（跨 3 个独立 pi 会话）。
+# 一键使用真实 pi coding agent + project-memory 扩展 + 真实大模型跑通作业一三步验证
+# （跨 3 个独立 pi --no-session 进程），写入 runs/step{1,2,3}_*.txt 并渲染 3 张终端截图到 screenshots/。
 #
 # 使用前请配置任意 pi 支持的模型 API Key，例如：
-#   export DEEPSEEK_API_KEY="sk-..."   # 或 OPENAI_API_KEY / ANTHROPIC_API_KEY
-#   export PI_PROVIDER="deepseek"      # 可选，按需传 --provider / --model
-#   export PI_MODEL="deepseek-chat"    # 可选
+#   export DEEPSEEK_API_KEY="sk-..."
+#   export PI_PROVIDER="deepseek"            # 默认 deepseek
+#   export PI_MODEL="deepseek-v4-flash"      # 默认 deepseek-v4-flash
 #
 # 运行方式：
 #   bash scripts/run_pi_with_llm.sh
@@ -13,14 +14,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TASK_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-EXT_PATH="${TASK_DIR}/extensions/project-memory.ts"
-RUNS_DIR="${TASK_DIR}/runs"
-WORK_DIR="${RUNS_DIR}/pi_live_workspace"
-MEMORY_ROOT="${RUNS_DIR}/pi_live_memory"
-
-mkdir -p "${RUNS_DIR}"
-rm -rf "${WORK_DIR}" "${MEMORY_ROOT}"
-cp -R "${TASK_DIR}/login_demo" "${WORK_DIR}"
+WEEK_DIR="$(cd "${TASK_DIR}/.." && pwd)"
+RENDERER="${WEEK_DIR}/scripts/render_terminal_png.py"
+PY_BIN="${WEEK_DIR}/task2-hybrid-rag/.venv/bin/python"
+if [[ ! -x "${PY_BIN}" ]]; then
+  PY_BIN="$(command -v python3)"
+fi
 
 PI_BIN="${TASK_DIR}/node_modules/.bin/pi"
 if [[ ! -x "${PI_BIN}" ]]; then
@@ -28,39 +27,29 @@ if [[ ! -x "${PI_BIN}" ]]; then
   exit 1
 fi
 
-EXTRA_ARGS=()
-if [[ -n "${PI_PROVIDER:-}" ]]; then
-  EXTRA_ARGS+=(--provider "${PI_PROVIDER}")
-fi
-if [[ -n "${PI_MODEL:-}" ]]; then
-  EXTRA_ARGS+=(--model "${PI_MODEL}")
-fi
+export PI_PROVIDER="${PI_PROVIDER:-deepseek}"
+export PI_MODEL="${PI_MODEL:-deepseek-v4-flash}"
 
-export PI_MEMORY_ROOT="${MEMORY_ROOT}"
-export PI_MEMORY_PROJECT_ID="login_demo"
+cd "${TASK_DIR}"
+node --import tsx scripts/run_pi_live.ts
 
-echo "=== [会话 1/3] 写入项目长期记忆 ==="
-(
-  cd "${WORK_DIR}"
-  "${PI_BIN}" --no-session -e "${EXT_PATH}" "${EXTRA_ARGS[@]}" -p \
-    "读取当前项目的会话测试文件和测试说明，将测试路径和运行命令保存到项目长期记忆，附上来源。返回实际保存路径。"
-) | tee "${RUNS_DIR}/pi_live_step1.txt"
+"${PY_BIN}" "${RENDERER}" \
+  --title "作业一 · 步骤 1：pi 真实会话写入持久化项目长期记忆 (${PI_MODEL})" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --input "${TASK_DIR}/runs/step1_write.txt" \
+  --output "${TASK_DIR}/screenshots/step1_write.png"
 
-echo ""
-echo "=== [会话 2/3] 全新会话读取并核对记忆 ==="
-(
-  cd "${WORK_DIR}"
-  "${PI_BIN}" --no-session -e "${EXT_PATH}" "${EXTRA_ARGS[@]}" -p \
-    "从当前项目长期记忆中查找会话测试入口，再核对当前文件是否存在。"
-) | tee "${RUNS_DIR}/pi_live_step2.txt"
+"${PY_BIN}" "${RENDERER}" \
+  --title "作业一 · 步骤 2：全新 pi 会话读取记忆并核对文件存在性 (${PI_MODEL})" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --input "${TASK_DIR}/runs/step2_new_session_read.txt" \
+  --output "${TASK_DIR}/screenshots/step2_new_session_read.png"
+
+"${PY_BIN}" "${RENDERER}" \
+  --title "作业一 · 步骤 3：全新 pi 会话迁移测试、跑测并更新记忆 (${PI_MODEL})" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --input "${TASK_DIR}/runs/step3_migrate_update.txt" \
+  --output "${TASK_DIR}/screenshots/step3_migrate_update.png"
 
 echo ""
-echo "=== [会话 3/3] 迁移测试、修改说明、运行新测试并更新记忆 ==="
-(
-  cd "${WORK_DIR}"
-  "${PI_BIN}" --no-session -e "${EXT_PATH}" "${EXTRA_ARGS[@]}" -p \
-    "将会话测试迁移到 tests/auth/test_session.py，同步修改测试说明，运行新测试命令。根据实际结果更新原来的长期记忆。"
-) | tee "${RUNS_DIR}/pi_live_step3.txt"
-
-echo ""
-echo "全部 3 个独立 pi 会话执行完成，输出已保存至 ${RUNS_DIR}/pi_live_step{1,2,3}.txt"
+echo "全部 3 个独立 pi 会话（${PI_PROVIDER}/${PI_MODEL}）执行完成，日志与 3 张截图已更新至 ${TASK_DIR}/screenshots/"

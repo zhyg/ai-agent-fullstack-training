@@ -1,56 +1,167 @@
 ========================================================================
-步骤 3（项目变化与更新记忆）：迁移测试 -> 修改说明 -> 实测通过 -> 更新记忆
+步骤 3（全新独立 pi 会话 3）：迁移测试、运行新命令并更新长期记忆
 ========================================================================
-提示词：将会话测试迁移到 tests/auth/test_session.py，同步修改测试说明，运行新测试命令。根据实际结果更新原来的长期记忆。
+调用模型  : deepseek / deepseek-v4-flash (turns=8, tokens=47234)
+提示词    : 将会话测试迁移到 tests/auth/test_session.py，同步修改测试说明，运行新测试命令。根据实际结果更新原来的长期记忆。
 
-[变更 1] 已迁移文件：tests/test_session.py -> tests/auth/test_session.py
-[变更 2] 已同步更新：docs/testing-guide.md
-[变更前核对] 旧记忆来源检查已准确发现失效路径：tests/test_session.py => MISSING
+--- 工具调用轨迹 (pi 真实执行) ---
+  (1) [OK] bash({"command":"pwd && ls -la && find . -maxdepth 3 -type f | grep -v node_modules | sort"})
+      /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace
+      total 0
+      drwxr-xr-x 6 antigravity antigravity  63 Nov 20 08:17 .
+      drwxr-xr-x 4 antigravity antigravity 169 Nov 20 08:17 ..
+      drwxrwxrwx 3 antigravity antigravity  70 Nov 20 08:17 .pytest_cache
+      drwxr-xr-x 3 antigravity antigravity  94 Nov 20 08:17 app
+      drwxr-xr-x 2 antigravity antigravity  54 Nov 20 08:17 docs
+      drwxr-xr-x 3 antigravity antigravity  48 Nov 20 08:17 tests
+      ./.pytest_cache/.gitignore
+      ./.pytest_cache/CACHEDIR.TAG
+      ./.pytest_cache/README.md
+      ./app/__init__.py
+      ./app/__pycache__/__init__.cpython-311.pyc
+      ./app/__pycache__/auth.cpython-311.pyc
+      ... (共 22 行，已截断)
+  (2) [OK] project_memory_read({"id":"testing/session-test-entry"})
+      ID：testing/session-test-entry (rev 1, verified)
+      标题：login_demo 会话测试入口与运行命令
+      保存路径：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+      来源核对：
+      - tests/test_session.py: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/tests/test_session.py)
+      - docs/testing-guide.md: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/testing-guide.md)
+      - docs/session-rules.md: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/session-rules.md)
+      - app/session.py: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/app/session.py)
+      - python -m pytest tests/test_session.py -q: 非文件路径依据
+      
+      ## 结论
+      
+      | 项 | 值 |
+      | --- | --- |
+      ... (共 57 行，已截断)
+  (3) [OK] read({"path":"tests/test_session.py"})
+      """login_demo 登录会话单元测试（对齐 docs/testing-guide.md）。""" |  ... (共 48 行)
+  (4) [OK] read({"path":"docs/testing-guide.md"})
+      --- | service: login_demo ... (共 26 行)
+  (5) [OK] read({"path":"docs/session-rules.md"})
+      --- | service: login_demo ... (共 31 行)
+  (6) [OK] read({"path":"app/session.py"})
+      """登录会话的判定实现。 |  ... (共 20 行)
+  (7) [OK] bash({"command":"mkdir -p tests/auth && mv tests/test_session.py tests/auth/test_session.py && find tests -type f -not -path '*/__pycache__/*' -print && python -m pytest tests/auth/test_session.py -q"})
+      tests/auth/test_session.py
+      ...                                                                      [100%]
+      3 passed in 0.02s
+  (8) [OK] edit({"path":"docs/testing-guide.md","edits":[{"oldText":"- 统一入口：`python -m pytest tests/test_session.py -q`\n- 不要直接敲 `pytest tests/test_session.py`，项目的 CI 只认 `python -m pytest` 形式。","newText":"- 统一入口：`python -m pytest tests/auth/test_session.py -q`\n- 不要直接敲 `pytest tests/auth/test_session.py`，项目的 CI 只认 `python -m pytest` 形式。"}]})
+      Successfully replaced 1 block(s) in docs/testing-guide.md.
+  (9) [OK] bash({"command":"python - <<'PY'\nfrom pathlib import Path\np = Path('docs/testing-guide.md')\ns = p.read_text()\ns = s.replace('updated: 2026-09-20', 'updated: 2026-11-20', 1)\np.write_text(s)\nPY\npython -m pytest tests/auth/test_session.py -q && python -m pytest -q"})
+      ...                                                                      [100%]
+      3 passed in 0.01s
+      ...                                                                      [100%]
+      3 passed in 0.01s
+  (10) [OK] read({"path":"docs/testing-guide.md"})
+      --- | service: login_demo ... (共 26 行)
+  (11) [OK] project_memory_update({"id":"testing/session-test-entry","title":"login_demo 会话测试入口与运行命令","description":"login_demo 会话单元测试已迁移至 tests/auth/test_session.py，统一入口为 python -m pytest tests/auth/test_session.py -q，实测 3 passed。","status":"verified","tags":["testing","pytest","session","auth","entrypoint","command"],"sources":["tests/auth/test_session.py","docs/testing-guide.md","docs/session-rules.md","app/session.py","python -m pytest tests/auth/test_session.py -q","python -m pytest -q"],"body":"## 结论\\n\\n| 项 | 值 |\\n| --- | --- |\\n| 测试文件 | `tests/auth/test_session.py`（原 `... (1779 chars)","changeNote":"测试迁移至 tests/auth/test_session.py 并同步 docs/testing-guide.md 的测试入口；已执行 python -m pytest tests/auth/test_session.py -q 与 python -m pytest -q，均为 3 passed。原 tests/test_session.py 已不存在。"})
+      已更新项目长期记忆：testing/session-test-entry (rev 2)
+      保存路径：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+      更新后来源：tests/auth/test_session.py, docs/testing-guide.md, docs/session-rules.md, app/session.py, python -m pytest tests/auth/test_session.py -q, python -m pytest -q
+      更新时间：2026-11-20T08:17:41.683Z
 
-[实测执行] $ python -m pytest tests/auth/test_session.py -q
-  ...                                                                      [100%]
-3 passed in 0.01s
+--- 模型最终回复 ---
+迁移完成。
 
-[工具回执] project_memory_update (rev 1 -> rev 2)：
-UPDATE OK
-  id         : testing/session-test-entry
-  revision   : 2
-  saved_path : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
-  sources    : tests/auth/test_session.py, docs/testing-guide.md
+变更内容：
+- `tests/test_session.py` → `tests/auth/test_session.py`（内容无需改动，根目录探测逻辑仍可定位 `app/`）
+- `docs/testing-guide.md`：测试入口更新为 `python -m pytest tests/auth/test_session.py -q`，`updated` 改为 `2026-11-20`
+- 长期记忆 `testing/session-test-entry` 更新至 rev 2，记录新路径、迁移说明与验证结果
 
-[新会话复查] project_memory_search (verifySources=true)：
-[1] testing/session-test-entry (rev 2, score=37.5)
-  title  : login_demo 会话测试入口与运行命令
-  path   : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
-  sources: tests/auth/test_session.py, docs/testing-guide.md
-  checks :
-    - [文件] tests/auth/test_session.py => EXISTS
-    - [文件] docs/testing-guide.md => EXISTS
-  body   :
-    # 会话测试入口与运行命令（已迁移更新）
+验证结果：
+```bash
+python -m pytest tests/auth/test_session.py -q   # 3 passed in 0.01s
+python -m pytest -q                              # 3 passed in 0.01s
+```
 
-    - 当前测试文件路径：`tests/auth/test_session.py`
-    - 当前统一运行命令：`python -m pytest tests/auth/test_session.py -q`
-    - 历史路径（已失效）：`tests/test_session.py`（已迁移至 `tests/auth/test_session.py`）
-    - 最新实测结果：`...                                                                      [100%] | 3 passed in 0.01s`
+旧路径 `tests/test_session.py` 已不存在。
 
-    # 核对清单
+--- 更新后 OKF 文件 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md, rev 2) ---
+---
+id: "testing/session-test-entry"
+project: "login_demo"
+type: Procedure
+title: "login_demo 会话测试入口与运行命令"
+description: "login_demo 会话单元测试已迁移至 tests/auth/test_session.py，统一入口为 python -m pytest tests/auth/test_session.py -q，实测 3 passed。"
+tags: ["testing", "pytest", "session", "auth", "entrypoint", "command"]
+sources: ["tests/auth/test_session.py", "docs/testing-guide.md", "docs/session-rules.md", "app/session.py", "python -m pytest tests/auth/test_session.py -q", "python -m pytest -q"]
+status: verified
+created_at: "2026-11-20T08:17:12.411Z"
+updated_at: "2026-11-20T08:17:41.683Z"
+revision: 2
+---
 
-    1. 确认 `tests/auth/test_session.py` 与 `docs/testing-guide.md` 存在且一致。
-    2. 旧路径 `tests/test_session.py` 已废弃，不得继续沿用。
+## 结论
 
-[删除动作验证] project_memory_delete：
-DELETE OK: testing/temp-debug-note (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/temp-debug-note.md)
+| 项 | 值 |
+| --- | --- |
+| 测试文件 | `tests/auth/test_session.py`（原 `tests/test_session.py` 已迁走，旧路径不存在） |
+| 运行命令（CI 唯一认可形式） | `python -m pytest tests/auth/test_session.py -q` |
+| 全量执行命令 | `python -m pytest -q` |
+| 实测结果 | `3 passed in 0.01s`（2026-11-20 在本工作区执行，单文件与全量均通过） |
 
-[审计日志 log.md]：
+## 运行步骤
+
+```bash
+# 1. 在项目根目录（包含 app/、docs/、tests/ 的那一层）执行
+cd runs/pi_live_workspace
+
+# 2. 如有虚拟环境则先激活（当前无 .venv，可跳过，见下方"环境差异"）
+source .venv/bin/activate
+
+# 3. 跑测试
+python -m pytest tests/auth/test_session.py -q
+
+# 4. 或跑全部测试
+python -m pytest -q
+```
+
+## 硬性约定（来自测试指南）
+
+- 必须使用 `python -m pytest ...`，**不要**直接敲 `pytest tests/auth/test_session.py`；项目 CI 只认 `python -m pytest` 形式。
+- 不要修改测试文件来让测试变绿，测试文件由维护者负责。
+- 新增功能需补对应用例，并在提交说明中写明用例名。
+
+## 关键用例与语义
+
+- `test_expire_boundary`：`now == expires_at` 必须为 `False`；`expires_at - 1` 为 `True`。
+- `test_refresh_extends_ttl`：续期后到期时间 = 请求到达时刻 + `SESSION_TTL_SECONDS`（30 分钟 = 1800 秒）。
+- `test_logout_invalidates`：`logout` 后同一令牌立即失效，且重复 `logout` 返回 `False`。
+
+规则依据：`docs/session-rules.md` 要求有效条件写作 `now < expires_at`，禁止 `now <= expires_at`（`app/session.py` 中 `is_session_valid` 已按此实现）。
+
+## 迁移说明
+
+- 测试已从 `tests/test_session.py` 移动到 `tests/auth/test_session.py`。
+- 测试文件内部的根目录探测逻辑基于 `Path(__file__)` 向上查找 `app/` 目录，移动后无需改动即可从新路径导入 `app.*`。
+- `docs/testing-guide.md` 的"测试入口"已同步更新为新路径，`updated` 改为 `2026-11-20`。
+
+## 环境差异（已核对，需注意）
+
+- `docs/testing-guide.md` 要求"运行前先激活虚拟环境：`source .venv/bin/activate`"，但当前工作区**没有 `.venv` 目录**。
+- 实测直接用系统 `python`（Python 3.11.2，pytest 9.2.0）即可通过，无需激活虚拟环境。
+- 若后续新建 `.venv`，再按文档先激活。
+
+## 核对清单
+
+1. `tests/auth/test_session.py` 是否存在，是否仍包含上述 3 个用例；旧 `tests/test_session.py` 应不存在。
+2. `docs/testing-guide.md` 的"测试入口"是否仍为 `python -m pytest tests/auth/test_session.py -q`。
+3. 重新执行该命令确认全绿，若用例数变化需更新本记忆。
+4. `app/session.py` 中 `SESSION_TTL_SECONDS` 是否仍为 `30 * 60`。
+
+--- 审计日志 log.md ---
 ---
 okf_version: "0.2"
 project: "login_demo"
 ---
 
 # login_demo 长期记忆变更日志
-- `2026-11-20T07:43:39.515Z` **WRITE** `testing/session-test-entry` — rev 1 | title="login_demo 会话测试入口与运行命令" | sources=[tests/test_session.py, docs/testing-guide.md]
-- `2026-11-20T07:43:40.242Z` **UPDATE** `testing/session-test-entry` — rev 1 -> 2 | 迁移测试至 tests/auth/test_session.py，同步修改 docs/testing-guide.md，实测 3 passed | sources=[tests/auth/test_session.py, docs/testing-guide.md]
-- `2026-11-20T07:43:40.471Z` **WRITE** `testing/temp-debug-note` — rev 1 | title="临时排查记录" | sources=[docs/testing-guide.md]
-- `2026-11-20T07:43:40.584Z` **DELETE** `testing/temp-debug-note` — 临时排查记录无长期复用价值，验证 delete 动作
+- `2026-11-20T08:17:12.412Z` **WRITE** `testing/session-test-entry` — rev 1 | title="login_demo 会话测试入口与运行命令" | sources=[tests/test_session.py, docs/testing-guide.md, docs/session-rules.md, app/session.py, python -m pytest tests/test_session.py -q]
+- `2026-11-20T08:17:41.684Z` **UPDATE** `testing/session-test-entry` — rev 1 -> 2 | 测试迁移至 tests/auth/test_session.py 并同步 docs/testing-guide.md 的测试入口；已执行 python -m pytest tests/auth/test_session.py -q 与 python -m pytest -q，均为 3 passed。原 tests/test_session.py 已不存在。 | sources=[tests/auth/test_session.py, docs/testing-guide.md, docs/session-rules.md, app/session.py, python -m pytest tests/auth/test_session.py -q, python -m pytest -q]
+
+[OKF 完整性校验] VALIDATE PASS (1 records in /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo)
 ========================================================================

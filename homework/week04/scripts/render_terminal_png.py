@@ -74,6 +74,8 @@ def line_color(line: str) -> Tuple[int, int, int]:
 
 def render_png(title: str, command: str, text: str, output: Path) -> None:
     clean = ANSI_RE.sub("", text).replace("\t", "    ")
+    for emoji, repl in (("✅", "[OK]"), ("⚠️", "[WARN]"), ("⚠", "[WARN]"), ("❌", "[FAIL]"), ("→", "->")):
+        clean = clean.replace(emoji, repl)
     raw_lines = [f"$ {command}", ""] + clean.splitlines()
     lines: List[str] = []
     for raw in raw_lines:

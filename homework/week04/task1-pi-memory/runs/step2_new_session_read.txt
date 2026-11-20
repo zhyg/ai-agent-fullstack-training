@@ -1,30 +1,91 @@
 ========================================================================
-步骤 2（全新会话 2）：跨进程检索项目长期记忆并核对文件存在性
+步骤 2（全新独立 pi 会话 2）：跨会话查找长期记忆并核对文件存在性
 ========================================================================
-提示词：从当前项目长期记忆中查找会话测试入口，再核对当前文件是否存在。
+调用模型  : deepseek / deepseek-v4-flash (turns=4, tokens=21068)
+隔离说明  : 已退出会话 1 进程，以下由全新 pi --no-session 进程从磁盘恢复记忆
+提示词    : 从当前项目长期记忆中查找会话测试入口，再核对当前文件是否存在。
 
-[新进程说明] 已结束会话 1 进程，以下结果由全新 Node 子进程从磁盘读取：
+--- 工具调用轨迹 (pi 真实执行) ---
+  (1) [OK] project_memory_search({"query":"会话测试入口 session test"})
+      [1] testing/session-test-entry | login_demo 会话测试入口与运行命令 (rev 1, verified, score=61.5)
+      路径：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+      摘要：login_demo 会话单元测试位于 tests/test_session.py，统一入口为 python -m pytest tests/test_session.py -q，已实测 3 passed。
+      来源：tests/test_session.py, docs/testing-guide.md, docs/session-rules.md, app/session.py, python -m pytest tests/test_session.py -q
+      来源核对：
+        - [文件] tests/test_session.py -> 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/tests/test_session.py)
+        - [文件] docs/testing-guide.md -> 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/testing-guide.md)
+        - [文件] docs/session-rules.md -> 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/session-rules.md)
+        - [文件] app/session.py -> 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/app/session.py)
+        - [依据] python -m pytest tests/test_session.py -q
+      正文：
+      ## 结论
+      
+      | 项 | 值 |
+      ... (共 58 行，已截断)
+  (2) [OK] project_memory_read({"id":"testing/session-test-entry"})
+      ID：testing/session-test-entry (rev 1, verified)
+      标题：login_demo 会话测试入口与运行命令
+      保存路径：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+      来源核对：
+      - tests/test_session.py: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/tests/test_session.py)
+      - docs/testing-guide.md: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/testing-guide.md)
+      - docs/session-rules.md: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/docs/session-rules.md)
+      - app/session.py: 存在 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/app/session.py)
+      - python -m pytest tests/test_session.py -q: 非文件路径依据
+      
+      ## 结论
+      
+      | 项 | 值 |
+      | --- | --- |
+      ... (共 57 行，已截断)
+  (3) [OK] bash({"command":"cd /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace && ls -la && echo '--- test funcs ---' && grep -n '^def test_' tests/test_session.py && echo '--- guide entry ---' && grep -n 'pytest' docs/testing-guide.md && echo '--- ttl ---' && grep -n 'SESSION_TTL_SECONDS' app/session.py && echo '--- venv ---' && (test -d .venv && echo '.venv exists' || echo '.venv missing')"})
+      total 0
+      drwxr-xr-x 6 antigravity antigravity  63 Nov 20 08:17 .
+      drwxr-xr-x 4 antigravity antigravity 169 Nov 20 08:17 ..
+      drwxrwxrwx 3 antigravity antigravity  70 Nov 20 08:17 .pytest_cache
+      drwxr-xr-x 3 antigravity antigravity  94 Nov 20 08:17 app
+      drwxr-xr-x 2 antigravity antigravity  54 Nov 20 08:17 docs
+      drwxr-xr-x 3 antigravity antigravity  48 Nov 20 08:17 tests
+      --- test funcs ---
+      19:def test_expire_boundary() -> None:
+      28:def test_refresh_extends_ttl() -> None:
+      41:def test_logout_invalidates() -> None:
+      --- guide entry ---
+      12:- 统一入口：`python -m pytest tests/test_session.py -q`
+      13:- 不要直接敲 `pytest tests/test_session.py`，项目的 CI 只认 `python -m pytest` 形式。
+      ... (共 19 行，已截断)
+  (4) [OK] read({"path":"/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace/tests/test_session.py"})
+      """login_demo 登录会话单元测试（对齐 docs/testing-guide.md）。""" |  ... (共 48 行)
+  (5) [OK] bash({"command":"cd /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace && python -m pytest tests/test_session.py -q 2>&1 | tail -5; echo \"exit=${PIPESTATUS[0]}\""})
+      ...                                                                      [100%]
+      3 passed in 0.01s
+      exit=0
 
-[工具回执] project_memory_search (query="会话测试入口", verifySources=true)：
-[1] testing/session-test-entry (rev 1, score=37.5)
-  title  : login_demo 会话测试入口与运行命令
-  path   : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
-  sources: tests/test_session.py, docs/testing-guide.md
-  checks :
-    - [文件] tests/test_session.py => EXISTS
-    - [文件] docs/testing-guide.md => EXISTS
-  body   :
-    # 会话测试入口与运行命令
+--- 模型最终回复 ---
+已从项目长期记忆中取回并核对完成。
 
-    - 测试文件路径：`tests/test_session.py`
-    - 统一运行命令：`python -m pytest tests/test_session.py -q`
-    - 覆盖用例：`test_expire_boundary`、`test_refresh_extends_ttl`、`test_logout_invalidates`
-    - 初次实测结果：`...                                                                      [100%] | 3 passed in 0.01s`
+## 记忆内容
+- **记录**：`testing/session-test-entry`（rev 1，verified）
+- **测试文件**：`tests/test_session.py`
+- **统一入口**：`python -m pytest tests/test_session.py -q`（CI 只认此形式，不用裸 `pytest`）
 
-    # 核对清单
+## 当前文件核对（实测）
+| 核对项 | 结果 |
+| --- | --- |
+| `tests/test_session.py` | ✅ 存在，含 3 个用例：`test_expire_boundary`、`test_refresh_extends_ttl`、`test_logout_invalidates` |
+| `docs/testing-guide.md` | ✅ 存在，第 12 行仍写 `python -m pytest tests/test_session.py -q` |
+| `docs/session-rules.md` | ✅ 存在 |
+| `app/session.py` | ✅ 存在，`SESSION_TTL_SECONDS = 30 * 60`（第 6 行） |
+| `.venv` | ⚠️ 不存在（与记忆一致，直接使用系统 python 即可） |
 
-    1. 新会话使用前，先确认 `tests/test_session.py` 与 `docs/testing-guide.md` 是否存在且一致。
-    2. 若测试路径迁移，运行新命令验证通过后再更新本记忆。
+## 实际执行
+```bash
+cd runs/pi_live_workspace
+python -m pytest tests/test_session.py -q
+# 3 passed in 0.01s  (exit=0)
+```
+
+结论：记忆与当前源码、文档、测试结果完全一致，无需更新记忆。
 
 [OKF 完整性校验] VALIDATE PASS (1 records in /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo)
 ========================================================================
