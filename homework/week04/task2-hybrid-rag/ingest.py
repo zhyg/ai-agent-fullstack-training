@@ -10,7 +10,7 @@ from pathlib import Path
 
 from rag.answer import source_label
 from rag.config import DEFAULT_CORPUS_DIR, DEFAULT_STORAGE_DIR, EMBED_MODEL
-from rag.store import bm25_path, build_and_save, manifest_path
+from rag.store import bm25_path, build_and_save, manifest_path, verify_index_alignment
 
 
 def pick_sample_node(nodes):
@@ -35,8 +35,7 @@ def main() -> int:
         store_dir=args.storage,
         overwrite=args.overwrite,
     )
-    vector_ids = set(index.docstore.docs.keys())
-    bm25_ids = {n.node_id for n in nodes}
+    alignment = verify_index_alignment(index, nodes)
     sample = pick_sample_node(nodes)
 
     summary = {
@@ -45,9 +44,9 @@ def main() -> int:
         "embedding_model": EMBED_MODEL,
         "document_count": len(docs),
         "node_count": len(nodes),
-        "vector_node_count": len(vector_ids),
-        "bm25_node_count": len(bm25_ids),
-        "same_node_batch_aligned": vector_ids == bm25_ids,
+        "vector_node_count": alignment.vector_node_count,
+        "bm25_node_count": alignment.bm25_node_count,
+        "same_node_batch_aligned": alignment.aligned,
         "files_persisted": sorted(p.name for p in args.storage.iterdir()),
         "sample_node": (
             {

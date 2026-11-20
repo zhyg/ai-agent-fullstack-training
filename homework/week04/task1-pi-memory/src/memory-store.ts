@@ -12,84 +12,38 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { escapeYamlString, parseRecordMarkdown, renderRecordMarkdown } from "./frontmatter.js";
+import { extractSearchTerms, formatSourceChecks, scoreMemoryRecord, verifyMemorySources } from "./search.js";
+import {
+  VALID_STATUSES,
+  VALID_TYPES,
+  type MemoryFrontmatter,
+  type MemoryRecord,
+  type MemoryStatus,
+  type MemoryType,
+  type SearchMemoryHit,
+  type SearchMemoryOptions,
+  type SourceCheckResult,
+  type UpdateMemoryInput,
+  type ValidationReport,
+  type WriteMemoryInput,
+} from "./types.js";
 
-export type MemoryType = "Fact" | "Rule" | "Procedure" | "Decision";
-export type MemoryStatus = "verified" | "unverified" | "deprecated";
-
-export interface MemoryFrontmatter {
-  id: string;
-  project: string;
-  type: MemoryType;
-  title: string;
-  description: string;
-  tags: string[];
-  sources: string[];
-  status: MemoryStatus;
-  created_at: string;
-  updated_at: string;
-  revision: number;
-}
-
-export interface MemoryRecord extends MemoryFrontmatter {
-  body: string;
-  filePath: string;
-}
-
-export interface SourceCheckResult {
-  source: string;
-  kind: "file" | "command_or_note";
-  resolvedPath?: string;
-  exists?: boolean;
-}
-
-export interface WriteMemoryInput {
-  id: string;
-  type?: MemoryType;
-  title: string;
-  description: string;
-  tags?: string[];
-  sources: string[];
-  status?: MemoryStatus;
-  body: string;
-}
-
-export interface UpdateMemoryInput {
-  id: string;
-  title?: string;
-  description?: string;
-  type?: MemoryType;
-  tags?: string[];
-  sources?: string[];
-  status?: MemoryStatus;
-  body?: string;
-  changeNote?: string;
-}
-
-export interface SearchMemoryOptions {
-  query?: string;
-  tag?: string;
-  type?: MemoryType;
-  status?: MemoryStatus;
-  limit?: number;
-  verifySources?: boolean;
-}
-
-export interface SearchMemoryHit {
-  record: MemoryRecord;
-  score: number;
-  sourceChecks?: SourceCheckResult[];
-}
-
-export interface ValidationReport {
-  valid: boolean;
-  projectKey: string;
-  storeDir: string;
-  recordCount: number;
-  errors: string[];
-}
-
-const VALID_TYPES: ReadonlySet<string> = new Set(["Fact", "Rule", "Procedure", "Decision"]);
-const VALID_STATUSES: ReadonlySet<string> = new Set(["verified", "unverified", "deprecated"]);
+export {
+  formatSourceChecks,
+  parseRecordMarkdown,
+  verifyMemorySources,
+  type MemoryFrontmatter,
+  type MemoryRecord,
+  type MemoryStatus,
+  type MemoryType,
+  type SearchMemoryHit,
+  type SearchMemoryOptions,
+  type SourceCheckResult,
+  type UpdateMemoryInput,
+  type ValidationReport,
+  type WriteMemoryInput,
+};
 
 export function getDefaultStorageRoot(): string {
   return (
@@ -117,11 +71,12 @@ export function resolveProjectKey(projectRoot: string, explicitProjectId?: strin
   const canonical = fs.existsSync(projectRoot)
     ? fs.realpathSync(projectRoot)
     : path.resolve(projectRoot);
-  const base = path
-    .basename(canonical)
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "project";
+  const base =
+    path
+      .basename(canonical)
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "project";
   const hash = crypto.createHash("sha256").update(canonical).digest("hex").slice(0, 8);
   return `${base}-${hash}`;
 }
@@ -149,157 +104,6 @@ export function normalizeMemoryId(rawId: string): string {
     throw new Error(`Reserved memory id: ${id}`);
   }
   return id;
-}
-
-function escapeYamlString(value: string): string {
-  return JSON.stringify(value);
-}
-
-function serializeList(items: string[]): string {
-  if (items.length === 0) return "[]";
-  return `[${items.map((x) => escapeYamlString(x)).join(", ")}]`;
-}
-
-function renderRecordMarkdown(meta: MemoryFrontmatter, body: string): string {
-  const lines = [
-    "---",
-    `id: ${escapeYamlString(meta.id)}`,
-    `project: ${escapeYamlString(meta.project)}`,
-    `type: ${meta.type}`,
-    `title: ${escapeYamlString(meta.title)}`,
-    `description: ${escapeYamlString(meta.description)}`,
-    `tags: ${serializeList(meta.tags)}`,
-    `sources: ${serializeList(meta.sources)}`,
-    `status: ${meta.status}`,
-    `created_at: ${escapeYamlString(meta.created_at)}`,
-    `updated_at: ${escapeYamlString(meta.updated_at)}`,
-    `revision: ${meta.revision}`,
-    "---",
-    "",
-    body.trim(),
-    "",
-  ];
-  return lines.join("\n");
-}
-
-function parseYamlScalar(raw: string): string {
-  const trimmed = raw.trim();
-  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-    try {
-      return String(JSON.parse(trimmed));
-    } catch {
-      return trimmed.slice(1, -1);
-    }
-  }
-  if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-}
-
-function parseYamlStringArray(raw: string): string[] {
-  const trimmed = raw.trim();
-  if (!trimmed || trimmed === "[]") return [];
-  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed)) {
-        return parsed.map((v) => String(v));
-      }
-    } catch {
-      const inner = trimmed.slice(1, -1).trim();
-      if (!inner) return [];
-      return inner.split(",").map((part) => parseYamlScalar(part));
-    }
-  }
-  return [parseYamlScalar(trimmed)];
-}
-
-export function parseRecordMarkdown(content: string, filePath: string): MemoryRecord {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) {
-    throw new Error(`Invalid OKF memory file (missing YAML frontmatter): ${filePath}`);
-  }
-  const [, headerRaw, bodyRaw] = match;
-  const fields: Record<string, string> = {};
-  for (const line of headerRaw.split(/\r?\n/)) {
-    const idx = line.indexOf(":");
-    if (idx === -1) continue;
-    const key = line.slice(0, idx).trim();
-    const val = line.slice(idx + 1).trim();
-    if (key) fields[key] = val;
-  }
-
-  const type = parseYamlScalar(fields.type || "Fact") as MemoryType;
-  const status = parseYamlScalar(fields.status || "verified") as MemoryStatus;
-  const revision = Number.parseInt(parseYamlScalar(fields.revision || "1"), 10);
-
-  return {
-    id: parseYamlScalar(fields.id || ""),
-    project: parseYamlScalar(fields.project || ""),
-    type: VALID_TYPES.has(type) ? type : "Fact",
-    title: parseYamlScalar(fields.title || ""),
-    description: parseYamlScalar(fields.description || ""),
-    tags: parseYamlStringArray(fields.tags || "[]"),
-    sources: parseYamlStringArray(fields.sources || "[]"),
-    status: VALID_STATUSES.has(status) ? status : "verified",
-    created_at: parseYamlScalar(fields.created_at || ""),
-    updated_at: parseYamlScalar(fields.updated_at || ""),
-    revision: Number.isFinite(revision) && revision > 0 ? revision : 1,
-    body: bodyRaw.trim(),
-    filePath,
-  };
-}
-
-function extractSearchTerms(query: string): string[] {
-  const lowered = query.toLowerCase().trim();
-  if (!lowered) return [];
-  const terms = new Set<string>();
-  for (const token of lowered.split(/[\s,，。；;、:/\\|]+/)) {
-    if (token) terms.add(token);
-  }
-  // 针对中文查询提取 2-gram，保证无外部中文分词器时依然能高精度召回
-  const cjkRuns = lowered.match(/[\u4e00-\u9fff]{2,}/g) || [];
-  for (const run of cjkRuns) {
-    terms.add(run);
-    for (let i = 0; i < run.length - 1; i++) {
-      terms.add(run.slice(i, i + 2));
-    }
-  }
-  return Array.from(terms);
-}
-
-/**
- * 核对记忆中引用的来源路径在当前项目目录中是否真实存在。
- */
-export function verifyMemorySources(projectRoot: string, sources: string[]): SourceCheckResult[] {
-  const canonicalRoot = path.resolve(projectRoot);
-  return sources.map((source) => {
-    const trimmed = source.trim();
-    const looksLikeFile =
-      !trimmed.includes(" ") &&
-      (trimmed.includes("/") || /\.(py|ts|js|md|json|yaml|yml|toml|txt|sh|csv|html|pdf)$/i.test(trimmed));
-    if (!looksLikeFile) {
-      return { source: trimmed, kind: "command_or_note" };
-    }
-    const candidate = path.resolve(canonicalRoot, trimmed);
-    const withinRoot =
-      candidate === canonicalRoot || candidate.startsWith(canonicalRoot + path.sep);
-    if (!withinRoot) {
-      return {
-        source: trimmed,
-        kind: "file",
-        resolvedPath: candidate,
-        exists: false,
-      };
-    }
-    return {
-      source: trimmed,
-      kind: "file",
-      resolvedPath: candidate,
-      exists: fs.existsSync(candidate),
-    };
-  });
 }
 
 export class ProjectMemoryStore {
@@ -427,8 +231,7 @@ export class ProjectMemoryStore {
       updated_at: now,
       revision: 1,
     };
-    const markdown = renderRecordMarkdown(meta, input.body);
-    fs.writeFileSync(filePath, markdown, "utf-8");
+    fs.writeFileSync(filePath, renderRecordMarkdown(meta, input.body), "utf-8");
     this.rebuildIndex();
     this.appendLog("WRITE", id, `rev 1 | title="${meta.title}" | sources=[${meta.sources.join(", ")}]`);
     return { ...meta, body: input.body.trim(), filePath };
@@ -469,31 +272,9 @@ export class ProjectMemoryStore {
 
     const hits: SearchMemoryHit[] = [];
     for (const rec of records) {
-      if (options.type && rec.type !== options.type) continue;
-      if (options.status && rec.status !== options.status) continue;
       if (tagFilter && !rec.tags.some((t) => t.toLowerCase() === tagFilter)) continue;
 
-      let score = 0;
-      if (terms.length === 0) {
-        score = 1;
-      } else {
-        const idLower = rec.id.toLowerCase();
-        const titleLower = rec.title.toLowerCase();
-        const descLower = rec.description.toLowerCase();
-        const tagsLower = rec.tags.join(" ").toLowerCase();
-        const sourcesLower = rec.sources.join(" ").toLowerCase();
-        const bodyLower = rec.body.toLowerCase();
-
-        for (const term of terms) {
-          if (idLower.includes(term)) score += 5;
-          if (titleLower.includes(term)) score += 4;
-          if (tagsLower.includes(term)) score += 3;
-          if (descLower.includes(term)) score += 2.5;
-          if (sourcesLower.includes(term)) score += 2;
-          if (bodyLower.includes(term)) score += 1;
-        }
-      }
-
+      const score = scoreMemoryRecord(rec, terms);
       if (score > 0) {
         hits.push({
           record: rec,
@@ -585,10 +366,7 @@ export class ProjectMemoryStore {
       (r) =>
         `- \`${r.id}\` (${r.type}, rev ${r.revision}, ${r.status}): ${r.title} — ${r.description} | sources: ${r.sources.join(", ")}`
     );
-    return [
-      `项目长期记忆目录 (${this.projectKey}，目录：${this.storeDir})：`,
-      ...rows,
-    ].join("\n");
+    return [`项目长期记忆目录 (${this.projectKey}，目录：${this.storeDir})：`, ...rows].join("\n");
   }
 
   public validate(): ValidationReport {

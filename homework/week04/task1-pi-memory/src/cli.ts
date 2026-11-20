@@ -7,6 +7,7 @@
 import process from "node:process";
 import {
   ProjectMemoryStore,
+  formatSourceChecks,
   verifyMemorySources,
   type MemoryStatus,
   type MemoryType,
@@ -92,13 +93,13 @@ function main(): void {
           ? `NO MATCHES in project ${store.projectKey}`
           : hits
               .map((h, i) => {
-                const checks = (h.sourceChecks || [])
-                  .map((c) =>
-                    c.kind === "file"
-                      ? `    - [文件] ${c.source} => ${c.exists ? "EXISTS" : "MISSING"}`
-                      : `    - [依据] ${c.source}`
-                  )
-                  .join("\n");
+                const checks = h.sourceChecks
+                  ? formatSourceChecks(h.sourceChecks, {
+                      indent: "    ",
+                      includeResolvedPath: false,
+                      asciiStatus: true,
+                    })
+                  : "";
                 const indentedBody = h.record.body
                   .split("\n")
                   .map((line) => (line ? `    ${line}` : ""))

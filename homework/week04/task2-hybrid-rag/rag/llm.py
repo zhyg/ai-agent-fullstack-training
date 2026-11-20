@@ -11,18 +11,13 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
 
-for _var in ("NO_PROXY", "no_proxy"):
-    _val = os.environ.get(_var)
-    if _val and "::1" in _val:
-        _parts = [p.strip() for p in _val.split(",") if p.strip() and p.strip() not in {"::1", "[::1]"}]
-        os.environ[_var] = ",".join(dict.fromkeys(_parts))
+from .config import BASE_DIR, sanitize_no_proxy
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+sanitize_no_proxy()
 
 
 @dataclass(frozen=True)

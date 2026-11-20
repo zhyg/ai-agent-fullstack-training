@@ -1,10 +1,10 @@
-"""证据装配、提示词构造与引用一致性核验。"""
+"""证据装配、提示词构造、引用一致性核验与统一终端输出格式化。"""
 
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 from llama_index.core.schema import NodeWithScore
 
@@ -76,3 +76,39 @@ def check_citations(answer_text: str, evidence_count: int) -> CitationCheck:
         invalid_indices=invalid,
         valid=bool(found) and not invalid,
     )
+
+
+def print_llm_answer_section(
+    *,
+    section_title: str,
+    list_title: str,
+    llm_status: str,
+    llm_info: Optional[dict],
+    answer: Optional[str],
+    citation_check: Optional[dict],
+    evidence_for_llm: Sequence[dict],
+    show_excerpt: bool = False,
+) -> None:
+    """统一打印大模型带来源引用回答、引用校验结果与引用来源清单。"""
+    print("\n" + "=" * 72)
+    print(section_title)
+    print("=" * 72)
+    if llm_status == "real_llm_called" and llm_info is not None and citation_check is not None:
+        print(f"调用模型: {llm_info['provider']} / {llm_info['model']}")
+        print("\n【模型回答】")
+        print(answer or "")
+        print(
+            f"\n【引用一致性校验】: {'PASS' if citation_check['valid'] else 'WARN'} "
+            f"(引用编号={citation_check['cited_indices']}, 越界编号={citation_check['invalid_indices']})"
+        )
+    else:
+        reason = "已指定 --no-llm" if llm_status == "skipped_by_flag" else "当前环境未配置大模型 API Key"
+        print(f"提示：{reason}，跳过在线大模型调用。")
+        print("配置 DEEPSEEK_API_KEY / MINIMAX_API_KEY / OPENAI_API_KEY 后重新执行即可调用真实模型生成回答。")
+
+    print(f"\n【{list_title}】")
+    for item in evidence_for_llm:
+        print(f"  [{item['index']}] {item['source']} (score={item['score']:.6f})")
+        if show_excerpt:
+            print(f"      摘录: {item['excerpt']}")
+    print("=" * 72)

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from query import print_hits, run_query
+from rag.answer import print_llm_answer_section
 from rag.config import (
     DEFAULT_CORPUS_DIR,
     DEFAULT_QUESTION,
@@ -20,7 +21,7 @@ from rag.config import (
     DEFAULT_UPDATED_STORAGE_DIR,
     RRF_K,
 )
-from rag.store import build_and_save, load_stores, sync_update
+from rag.store import build_and_save, check_stale_chunks, sync_update
 
 # 将当前登录会话有效期由 30 分钟调整为 20 分钟的定点替换规则（保留记住我 30 天与历史文档原样）
 REPLACEMENTS: List[Tuple[str, List[Tuple[str, str]]]] = [
@@ -86,30 +87,8 @@ def apply_ttl_update(corpus_copy: Path) -> List[str]:
 
 
 def verify_no_stale_chunks(storage_dir: Path, updated_files: List[str]) -> dict:
-    """检查向量索引（docstore）与 BM25 索引中，所有已更新文件均已彻底清除旧的 30 分钟内容。"""
-    index, _, bm25_nodes = load_stores(storage_dir)
-    updated_set = set(updated_files)
-
-    stale_in_vector: List[str] = []
-    for nid, node in index.docstore.docs.items():
-        fp = node.metadata.get("file_path")
-        if fp in updated_set and ("30 分钟" in node.text or "30 * 60" in node.text):
-            stale_in_vector.append(nid)
-
-    stale_in_bm25: List[str] = []
-    for node in bm25_nodes:
-        fp = node.metadata.get("file_path")
-        if fp in updated_set and ("30 分钟" in node.text or "30 * 60" in node.text):
-            stale_in_bm25.append(node.node_id)
-
-    vector_ids = set(index.docstore.docs.keys())
-    bm25_ids = {n.node_id for n in bm25_nodes}
-    return {
-        "stale_in_vector": stale_in_vector,
-        "stale_in_bm25": stale_in_bm25,
-        "indexes_aligned": vector_ids == bm25_ids,
-        "passed": (not stale_in_vector) and (not stale_in_bm25) and (vector_ids == bm25_ids),
-    }
+    """委托 rag.store 校验两路索引中已更新文件均已彻底清除旧的 30 分钟内容。"""
+    return check_stale_chunks(storage_dir, updated_files, stale_terms=("30 分钟", "30 * 60"))
 
 
 def main() -> int:
@@ -148,16 +127,15 @@ def main() -> int:
     stale_check = verify_no_stale_chunks(args.updated_storage, changed_files)
 
     # 5. 重新查询同一问题
-    query_out = run_query(
+    query_result = run_query(
         storage_dir=args.updated_storage,
         question=args.question,
         mode="compare",
         top_k=args.top_k,
         no_llm=args.no_llm,
     )
-    hits_map = query_out.pop("_hits")
 
-    if args.require_llm and query_out["llm_status"] != "real_llm_called":
+    if args.require_llm and query_result.llm_status != "real_llm_called":
         print(
             "错误：--require-llm 已开启，但未配置大模型 API Key。",
             file=sys.stderr,
@@ -179,7 +157,7 @@ def main() -> int:
             "aligned": report.aligned,
         },
         "stale_check": stale_check,
-        "query_result": query_out,
+        "query_result": query_result.to_dict(),
     }
 
     if args.as_json:
@@ -202,32 +180,20 @@ def main() -> int:
         f"旧分块清理核验: {'PASS (两路索引中已更新文件均无 30 分钟旧分块残留)' if stale_check['passed'] else 'FAIL'}"
     )
 
-    print_hits("更新后 1) 向量检索 (BGE-small-zh-v1.5)", hits_map["vector"])
-    print_hits("更新后 2) 关键词检索 (BM25 + jieba)", hits_map["bm25"])
-    print_hits(f"更新后 3) RRF 混合检索 (k={RRF_K})", hits_map["hybrid"])
+    print_hits("更新后 1) 向量检索 (BGE-small-zh-v1.5)", query_result.hits_by_mode["vector"])
+    print_hits("更新后 2) 关键词检索 (BM25 + jieba)", query_result.hits_by_mode["bm25"])
+    print_hits(f"更新后 3) RRF 混合检索 (k={RRF_K})", query_result.hits_by_mode["hybrid"])
 
-    print("\n" + "=" * 72)
-    print("更新后的回答与引用核验")
-    print("=" * 72)
-    if query_out["llm_status"] == "real_llm_called":
-        print(f"调用模型: {query_out['llm']['provider']} / {query_out['llm']['model']}")
-        print("\n【模型回答】")
-        print(query_out["answer"])
-        chk = query_out["citation_check"]
-        print(
-            f"\n【引用一致性校验】: {'PASS' if chk['valid'] else 'WARN'} "
-            f"(引用编号={chk['cited_indices']}, 越界编号={chk['invalid_indices']})"
-        )
-    else:
-        reason = "已指定 --no-llm" if query_out["llm_status"] == "skipped_by_flag" else "当前环境未配置大模型 API Key"
-        print(f"提示：{reason}，跳过在线大模型调用。")
-        print("配置 DEEPSEEK_API_KEY / MINIMAX_API_KEY / OPENAI_API_KEY 后重新执行即可产出真实模型更新后回答。")
-
-    print("\n【更新后引用来源清单（与 [编号] 一一对应）】")
-    for item in query_out["evidence_for_llm"]:
-        print(f"  [{item['index']}] {item['source']} (score={item['score']:.6f})")
-        print(f"      摘录: {item['excerpt']}")
-    print("=" * 72)
+    print_llm_answer_section(
+        section_title="更新后的回答与引用核验",
+        list_title="更新后引用来源清单（与 [编号] 一一对应）",
+        llm_status=query_result.llm_status,
+        llm_info=query_result.llm,
+        answer=query_result.answer,
+        citation_check=query_result.citation_check,
+        evidence_for_llm=query_result.evidence_for_llm,
+        show_excerpt=True,
+    )
     return 0 if stale_check["passed"] else 1
 
 

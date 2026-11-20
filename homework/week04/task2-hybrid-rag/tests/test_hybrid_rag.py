@@ -1,20 +1,21 @@
-"""Task 2 自动化测试：统一分块、双路持久化、真实 BGE Embedding、三路对比、增量同步更新清理旧块、引用校验与 LLM 适配。"""
+"""Task 2 自动化测试：统一分块、双路持久化（含 BM25 索引状态）、真实 BGE Embedding、三路对比、增量同步更新清理旧块、引用校验与 LLM 适配。"""
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from query import run_query
-from rag.answer import build_prompt, check_citations
+from query import QueryResult, run_query
+from rag.answer import check_citations
 from rag.config import DEFAULT_CORPUS_DIR, DEFAULT_QUESTION
 from rag.embed import BGESmallZhEmbedding
-from rag.hybrid import BM25Retriever, hybrid_retrieve, rrf_fuse, vector_retrieve
+from rag.hybrid import BM25Retriever, hybrid_retrieve, vector_retrieve
 from rag.llm import LLMConfig, call_llm, resolve_llm_config
-from rag.store import build_and_save, load_stores, sync_update
+from rag.store import bm25_path, build_and_save, load_stores, sync_update, verify_index_alignment
 from update_verify import apply_ttl_update, verify_no_stale_chunks
 
 
@@ -43,15 +44,34 @@ def test_real_bge_embedding_dimension_and_semantics() -> None:
 
 
 def test_same_batch_nodes_persisted_and_aligned(built_store) -> None:
-    _, store_dir, docs, nodes, index = built_store
+    _, store_dir, docs, nodes, _ = built_store
     assert len(docs) >= 10
     assert len(nodes) > len(docs)
 
+    # 校验 BM25 索引文件真实落盘了 IDF / doc_freqs / doc_len / avgdl
+    persisted = json.loads(bm25_path(store_dir).read_text(encoding="utf-8"))
+    bm25_state = persisted["bm25_index"]
+    assert bm25_state["corpus_size"] == len(nodes)
+    assert len(bm25_state["doc_freqs"]) == len(nodes)
+    assert len(bm25_state["doc_len"]) == len(nodes)
+    assert len(bm25_state["idf"]) > 0
+    assert bm25_state["avgdl"] > 0
+
     loaded_index, bm25, loaded_nodes = load_stores(store_dir)
-    vector_ids = set(loaded_index.docstore.docs.keys())
-    bm25_ids = {n.node_id for n in loaded_nodes}
-    assert vector_ids == bm25_ids
+    alignment = verify_index_alignment(loaded_index, loaded_nodes)
+    assert alignment.aligned is True
+    assert alignment.vector_node_count == len(nodes)
+    assert alignment.bm25_node_count == len(nodes)
     assert len(bm25.nodes) == len(nodes)
+
+    # 从磁盘恢复的 BM25 索引检索结果应与现场重新构建完全一致
+    fresh_bm25 = BM25Retriever(loaded_nodes)
+    persisted_hits = bm25.retrieve(DEFAULT_QUESTION, top_k=5)
+    fresh_hits = fresh_bm25.retrieve(DEFAULT_QUESTION, top_k=5)
+    assert [h.node.node_id for h in persisted_hits] == [h.node.node_id for h in fresh_hits]
+    for a, b in zip(persisted_hits, fresh_hits):
+        assert a.score == pytest.approx(b.score, rel=1e-9)
+
     # 每个节点都带有 file_path 与 heading 来源元数据
     assert all(n.metadata.get("file_path") and n.metadata.get("heading") for n in loaded_nodes)
 
@@ -100,7 +120,8 @@ def test_sync_update_replaces_old_chunks_in_both_indexes(built_store, tmp_path: 
 
     # 重新查询同一问题：三路 Top-5 中核心规则已全部变为 20 分钟
     out = run_query(store_copy, DEFAULT_QUESTION, mode="compare", top_k=5, no_llm=True)
-    top_hybrid = out["retrieval"]["hybrid"][0]
+    assert isinstance(out, QueryResult)
+    top_hybrid = out.retrieval["hybrid"][0]
     assert top_hybrid["file_path"] == "docs/session-rules.md"
     assert "20 分钟" in top_hybrid["excerpt"]
     assert "30 分钟" not in top_hybrid["excerpt"]

@@ -6,16 +6,56 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from llama_index.core.schema import NodeWithScore
 
-from rag.answer import build_prompt, check_citations, format_citations, source_label
+from rag.answer import (
+    build_prompt,
+    check_citations,
+    format_citations,
+    print_llm_answer_section,
+    source_label,
+)
 from rag.config import DEFAULT_CANDIDATE_K, DEFAULT_QUESTION, DEFAULT_STORAGE_DIR, DEFAULT_TOP_K, RRF_K
 from rag.hybrid import hybrid_retrieve, vector_retrieve
 from rag.llm import call_llm, resolve_llm_config
 from rag.store import load_stores
+
+
+@dataclass
+class QueryResult:
+    """结构化检索与问答结果（显式区分可序列化字段与原始命中节点）。"""
+
+    question: str
+    storage_dir: str
+    mode: str
+    top_k: int
+    retrieval: Dict[str, List[dict]]
+    evidence_for_llm: List[dict]
+    llm_status: str
+    llm: Optional[dict]
+    answer: Optional[str]
+    citation_check: Optional[dict]
+    prompt: str
+    hits_by_mode: Dict[str, List[NodeWithScore]]
+
+    def to_dict(self) -> dict:
+        return {
+            "question": self.question,
+            "storage_dir": self.storage_dir,
+            "mode": self.mode,
+            "top_k": self.top_k,
+            "retrieval": self.retrieval,
+            "evidence_for_llm": self.evidence_for_llm,
+            "llm_status": self.llm_status,
+            "llm": self.llm,
+            "answer": self.answer,
+            "citation_check": self.citation_check,
+            "prompt": self.prompt,
+        }
 
 
 def print_hits(title: str, hits: List[NodeWithScore]) -> None:
@@ -36,7 +76,7 @@ def run_query(
     top_k: int = DEFAULT_TOP_K,
     candidate_k: int = DEFAULT_CANDIDATE_K,
     no_llm: bool = False,
-) -> dict:
+) -> QueryResult:
     index, bm25, _ = load_stores(storage_dir)
 
     results: Dict[str, List[NodeWithScore]] = {}
@@ -73,20 +113,20 @@ def run_query(
             "invalid_indices": chk.invalid_indices,
         }
 
-    return {
-        "question": question,
-        "storage_dir": str(storage_dir.resolve()),
-        "mode": mode,
-        "top_k": top_k,
-        "retrieval": {name: format_citations(hits) for name, hits in results.items()},
-        "evidence_for_llm": format_citations(evidence_hits),
-        "llm_status": llm_status,
-        "llm": llm_info,
-        "answer": answer_text,
-        "citation_check": citation_check,
-        "prompt": prompt,
-        "_hits": results,
-    }
+    return QueryResult(
+        question=question,
+        storage_dir=str(storage_dir.resolve()),
+        mode=mode,
+        top_k=top_k,
+        retrieval={name: format_citations(hits) for name, hits in results.items()},
+        evidence_for_llm=format_citations(evidence_hits),
+        llm_status=llm_status,
+        llm=llm_info,
+        answer=answer_text,
+        citation_check=citation_check,
+        prompt=prompt,
+        hits_by_mode=results,
+    )
 
 
 def main() -> int:
@@ -106,7 +146,7 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", dest="as_json", help="以 JSON 格式输出")
     args = parser.parse_args()
 
-    out = run_query(
+    result = run_query(
         storage_dir=args.storage,
         question=args.question,
         mode=args.mode,
@@ -114,9 +154,8 @@ def main() -> int:
         candidate_k=args.candidate_k,
         no_llm=args.no_llm,
     )
-    hits_map = out.pop("_hits")
 
-    if args.require_llm and out["llm_status"] != "real_llm_called":
+    if args.require_llm and result.llm_status != "real_llm_called":
         print(
             "错误：--require-llm 已开启，但未配置大模型 API Key（支持 DEEPSEEK_API_KEY / MINIMAX_API_KEY / OPENAI_API_KEY / LLM_API_KEY）。",
             file=sys.stderr,
@@ -124,40 +163,29 @@ def main() -> int:
         return 2
 
     if args.as_json:
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         return 0
 
     print("=" * 72)
     print(f"步骤 2：查询对比与带来源回答 | 问题：{args.question}")
     print("=" * 72)
-    if "vector" in hits_map:
-        print_hits("1) 向量检索 (BGE-small-zh-v1.5)", hits_map["vector"])
-    if "bm25" in hits_map:
-        print_hits("2) 关键词检索 (BM25 + jieba)", hits_map["bm25"])
-    if "hybrid" in hits_map:
-        print_hits(f"3) RRF 混合检索 (k={RRF_K})", hits_map["hybrid"])
+    if "vector" in result.hits_by_mode:
+        print_hits("1) 向量检索 (BGE-small-zh-v1.5)", result.hits_by_mode["vector"])
+    if "bm25" in result.hits_by_mode:
+        print_hits("2) 关键词检索 (BM25 + jieba)", result.hits_by_mode["bm25"])
+    if "hybrid" in result.hits_by_mode:
+        print_hits(f"3) RRF 混合检索 (k={RRF_K})", result.hits_by_mode["hybrid"])
 
-    print("\n" + "=" * 72)
-    print("基于 RRF 混合检索证据生成带来源引用的回答")
-    print("=" * 72)
-    if out["llm_status"] == "real_llm_called":
-        print(f"调用模型: {out['llm']['provider']} / {out['llm']['model']}")
-        print("\n【模型回答】")
-        print(out["answer"])
-        chk = out["citation_check"]
-        print(
-            f"\n【引用一致性校验】: {'PASS' if chk['valid'] else 'WARN'} "
-            f"(引用编号={chk['cited_indices']}, 越界编号={chk['invalid_indices']})"
-        )
-    else:
-        reason = "已指定 --no-llm" if out["llm_status"] == "skipped_by_flag" else "当前环境未配置大模型 API Key"
-        print(f"提示：{reason}，跳过在线大模型调用。")
-        print("配置 DEEPSEEK_API_KEY / MINIMAX_API_KEY / OPENAI_API_KEY 后重新执行即可调用真实模型生成回答。")
-
-    print("\n【引用来源清单（与 [编号] 一一对应）】")
-    for item in out["evidence_for_llm"]:
-        print(f"  [{item['index']}] {item['source']} (score={item['score']:.6f})")
-    print("=" * 72)
+    print_llm_answer_section(
+        section_title="基于 RRF 混合检索证据生成带来源引用的回答",
+        list_title="引用来源清单（与 [编号] 一一对应）",
+        llm_status=result.llm_status,
+        llm_info=result.llm,
+        answer=result.answer,
+        citation_check=result.citation_check,
+        evidence_for_llm=result.evidence_for_llm,
+        show_excerpt=False,
+    )
     return 0
 
 

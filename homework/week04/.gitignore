@@ -11,3 +11,4 @@ dist/
 **/runs/login_demo_workspace/
 **/runs/pi_live_workspace/
 **/runs/pi_live_memory/
+**/runs/cli_offline/

@@ -1,4 +1,4 @@
-"""统一分块、双路持久化（VectorStoreIndex + BM25）与增量同步更新。"""
+"""统一分块、双路持久化（VectorStoreIndex + BM25 索引）与增量同步更新。"""
 
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ from llama_index.core.vector_stores import SimpleVectorStore
 from .config import CHUNK_OVERLAP, CHUNK_SIZE
 from .docload import file_sha256, load_all, load_one, scan_corpus
 from .embed import BGESmallZhEmbedding
-from .hybrid import BM25Retriever, load_bm25_nodes, save_bm25_nodes
+from .hybrid import BM25Retriever
 
-BM25_FILE = "bm25_nodes.json"
+BM25_FILE = "bm25_index.json"
 MANIFEST_FILE = "manifest.json"
 
 
@@ -145,13 +145,62 @@ def load_manifest(store_dir: Path) -> Dict[str, dict]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@dataclass(frozen=True)
+class IndexAlignment:
+    vector_node_count: int
+    bm25_node_count: int
+    aligned: bool
+
+
+def verify_index_alignment(index: VectorStoreIndex, bm25_nodes: Sequence[TextNode]) -> IndexAlignment:
+    """校验向量索引 docstore 与 BM25 索引中的 node_id 集合是否完全一致。"""
+    vector_ids = set(index.docstore.docs.keys())
+    bm25_ids = {n.node_id for n in bm25_nodes}
+    return IndexAlignment(
+        vector_node_count=len(vector_ids),
+        bm25_node_count=len(bm25_ids),
+        aligned=(vector_ids == bm25_ids),
+    )
+
+
+def check_stale_chunks(
+    store_dir: Path,
+    updated_files: Sequence[str],
+    stale_terms: Sequence[str] = ("30 分钟", "30 * 60"),
+    embed_model: BaseEmbedding | None = None,
+) -> dict:
+    """检查向量索引与持久化 BM25 索引中，所有已更新文件是否已彻底清除旧分块且两路对齐。"""
+    index, _, bm25_nodes = load_stores(store_dir, embed_model=embed_model)
+    updated_set = set(updated_files)
+
+    stale_in_vector: List[str] = []
+    for nid, node in index.docstore.docs.items():
+        fp = node.metadata.get("file_path")
+        if fp in updated_set and any(term in node.text for term in stale_terms):
+            stale_in_vector.append(nid)
+
+    stale_in_bm25: List[str] = []
+    for node in bm25_nodes:
+        fp = node.metadata.get("file_path")
+        if fp in updated_set and any(term in node.text for term in stale_terms):
+            stale_in_bm25.append(node.node_id)
+
+    alignment = verify_index_alignment(index, bm25_nodes)
+    return {
+        "stale_in_vector": stale_in_vector,
+        "stale_in_bm25": stale_in_bm25,
+        "indexes_aligned": alignment.aligned,
+        "passed": (not stale_in_vector) and (not stale_in_bm25) and alignment.aligned,
+    }
+
+
 def build_and_save(
     corpus_dir: Path,
     store_dir: Path,
     overwrite: bool = True,
     embed_model: BaseEmbedding | None = None,
 ) -> tuple[List[Document], List[TextNode], VectorStoreIndex]:
-    """从语料目录全量构建向量索引与 BM25 索引（基于同一批节点）并落盘。"""
+    """从语料目录全量构建向量索引与 BM25 关键词索引（基于同一批节点）并落盘。"""
     if store_dir.exists():
         if not overwrite:
             raise RuntimeError(f"索引目录已存在：{store_dir}（可传 --overwrite 重建）")
@@ -172,7 +221,10 @@ def build_and_save(
         show_progress=False,
     )
     index.storage_context.persist(str(store_dir))
-    save_bm25_nodes(nodes, bm25_path(store_dir))
+
+    # 基于同一批节点真正构建并持久化 BM25 索引（含词频统计与 IDF 表）
+    bm25 = BM25Retriever(nodes)
+    bm25.save(bm25_path(store_dir))
     _save_manifest(_build_manifest(nodes), store_dir)
     return docs, nodes, index
 
@@ -181,13 +233,13 @@ def load_stores(
     store_dir: Path,
     embed_model: BaseEmbedding | None = None,
 ) -> tuple[VectorStoreIndex, BM25Retriever, List[TextNode]]:
-    """从落盘目录加载向量索引与 BM25 检索器。"""
+    """从落盘目录直接加载向量索引与持久化 BM25 索引。"""
     model = get_embedding(embed_model)
     Settings.embed_model = model
     ctx = StorageContext.from_defaults(persist_dir=str(store_dir))
     index = load_index_from_storage(ctx, embed_model=model)
-    nodes = load_bm25_nodes(bm25_path(store_dir))
-    return index, BM25Retriever(nodes), nodes
+    bm25 = BM25Retriever.load(bm25_path(store_dir))
+    return index, bm25, bm25.nodes
 
 
 @dataclass
@@ -266,18 +318,17 @@ def sync_update(
 
     bm25_nodes.sort(key=lambda n: n.node_id)
     index.storage_context.persist(str(store_dir))
-    save_bm25_nodes(bm25_nodes, bm25_path(store_dir))
+    BM25Retriever(bm25_nodes).save(bm25_path(store_dir))
     _save_manifest(manifest, store_dir)
 
-    vector_ids = set(index.docstore.docs.keys())
-    bm25_ids = {n.node_id for n in bm25_nodes}
+    alignment = verify_index_alignment(index, bm25_nodes)
     return SyncUpdateReport(
         added_files=sorted(added),
         modified_files=sorted(modified),
         deleted_files=sorted(deleted),
         removed_node_ids=removed_node_ids,
         inserted_node_ids=inserted_node_ids,
-        total_vector_nodes=len(vector_ids),
-        total_bm25_nodes=len(bm25_ids),
-        aligned=(vector_ids == bm25_ids),
+        total_vector_nodes=alignment.vector_node_count,
+        total_bm25_nodes=alignment.bm25_node_count,
+        aligned=alignment.aligned,
     )

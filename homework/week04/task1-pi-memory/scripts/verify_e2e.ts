@@ -18,7 +18,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TASK_DIR = path.resolve(__dirname, "..");
 const SOURCE_DEMO = path.join(TASK_DIR, "login_demo");
 const CLI_PATH = path.join(TASK_DIR, "src", "cli.ts");
-const RUNS_DIR = path.join(TASK_DIR, "runs");
+const RUNS_DIR = path.resolve(
+  process.env.PI_VERIFY_OUTPUT_DIR || path.join(TASK_DIR, "runs", "cli_offline")
+);
 const WORKSPACE_COPY = path.join(RUNS_DIR, "login_demo_workspace");
 const MEMORY_ROOT = path.join(RUNS_DIR, "okf-memory-store");
 

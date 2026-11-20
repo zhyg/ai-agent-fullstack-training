@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # 一键使用真实 pi coding agent + project-memory 扩展 + 真实大模型跑通作业一三步验证
-# （跨 3 个独立 pi --no-session 进程），写入 runs/step{1,2,3}_*.txt 并渲染 3 张终端截图到 screenshots/。
+# （跨独立 pi --no-session 进程，覆盖写 / 查读 / 改 / 删全部四个动作），
+# 写入 runs/step{1,2,3}_*.txt 并渲染 3 张终端截图到 screenshots/。
 #
 # 使用前请配置任意 pi 支持的模型 API Key，例如：
 #   export DEEPSEEK_API_KEY="sk-..."
@@ -30,26 +31,30 @@ fi
 export PI_PROVIDER="${PI_PROVIDER:-deepseek}"
 export PI_MODEL="${PI_MODEL:-deepseek-v4-flash}"
 
+PROMPT1="读取当前项目的会话测试文件和测试说明，将测试路径和运行命令保存到项目长期记忆，附上来源。返回实际保存路径。"
+PROMPT2="从当前项目长期记忆中查找会话测试入口，再核对当前文件是否存在。"
+PROMPT3="将会话测试迁移到 tests/auth/test_session.py，同步修改测试说明，运行新测试命令。根据实际结果更新原来的长期记忆。"
+
 cd "${TASK_DIR}"
 node --import tsx scripts/run_pi_live.ts
 
 "${PY_BIN}" "${RENDERER}" \
   --title "作业一 · 步骤 1：pi 真实会话写入持久化项目长期记忆 (${PI_MODEL})" \
-  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p \"${PROMPT1}\"" \
   --input "${TASK_DIR}/runs/step1_write.txt" \
   --output "${TASK_DIR}/screenshots/step1_write.png"
 
 "${PY_BIN}" "${RENDERER}" \
   --title "作业一 · 步骤 2：全新 pi 会话读取记忆并核对文件存在性 (${PI_MODEL})" \
-  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p \"${PROMPT2}\"" \
   --input "${TASK_DIR}/runs/step2_new_session_read.txt" \
   --output "${TASK_DIR}/screenshots/step2_new_session_read.png"
 
 "${PY_BIN}" "${RENDERER}" \
-  --title "作业一 · 步骤 3：全新 pi 会话迁移测试、跑测并更新记忆 (${PI_MODEL})" \
-  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p '...'" \
+  --title "作业一 · 步骤 3：全新 pi 会话迁移测试、更新记忆并验证删除 (${PI_MODEL})" \
+  --command "pi --no-session -e extensions/project-memory.ts --provider ${PI_PROVIDER} --model ${PI_MODEL} -p \"${PROMPT3}\"" \
   --input "${TASK_DIR}/runs/step3_migrate_update.txt" \
   --output "${TASK_DIR}/screenshots/step3_migrate_update.png"
 
 echo ""
-echo "全部 3 个独立 pi 会话（${PI_PROVIDER}/${PI_MODEL}）执行完成，日志与 3 张截图已更新至 ${TASK_DIR}/screenshots/"
+echo "全部独立 pi 会话（${PI_PROVIDER}/${PI_MODEL}）执行完成，日志与 3 张截图已更新至 ${TASK_DIR}/screenshots/"

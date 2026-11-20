@@ -339,31 +339,48 @@ function main(): void {
     "会话 3 必须调用 project_memory_update 更新原长期记忆"
   );
 
+  // =========================================================================
+  // 补充闭环验证（独立 pi 会话 4）：写入临时记录并删除，验证四个动作完整可用
+  // =========================================================================
+  const promptDelete =
+    "为验证删除动作，先调用 project_memory_write 写入一条临时排查记录（id 为 testing/temp-debug-note，来源 docs/testing-guide.md），再立即调用 project_memory_delete 将其删除，确认原记忆 testing/session-test-entry 保持不变。";
+  console.log("\n=== [补充验证] 启动独立 pi 进程验证 project_memory_delete ===");
+  const sDel = runPiSession(promptDelete, provider, model);
+  assert.ok(
+    sDel.toolTrace.some((t) => t.name === "project_memory_delete" && !t.isError),
+    "删除验证会话必须调用 project_memory_delete 并成功"
+  );
+  assert.equal(store.read("testing/temp-debug-note"), null, "临时排查记录删除后应不存在");
+
   const recordsAfterS3 = store.list();
   const updatedRecord = recordsAfterS3.find((r) => r.id === primaryRecordS1.id) || recordsAfterS3[0];
   assert.ok(updatedRecord && updatedRecord.revision >= 2, "原记忆 revision 必须递增至 >= 2");
   const updatedFileContent = fs.readFileSync(updatedRecord.filePath, "utf-8").trim();
   const logContent = fs.readFileSync(store.logPath, "utf-8").trim();
+  assert.match(logContent, /\*\*DELETE\*\*/, "log.md 必须留存真实 pi 执行的 DELETE 审计记录");
   const validationS3 = store.validate();
   assert.equal(validationS3.valid, true, `更新后 OKF 校验失败: ${validationS3.errors.join("; ")}`);
 
   const step3Log = [
     "========================================================================",
-    "步骤 3（全新独立 pi 会话 3）：迁移测试、运行新命令并更新长期记忆",
+    "步骤 3（全新独立 pi 会话 3）：迁移测试、运行新命令、更新长期记忆并验证删除",
     "========================================================================",
     `调用模型  : ${s3.provider} / ${s3.model} (turns=${s3.turns}, tokens=${s3.totalTokens})`,
     `提示词    : ${prompt3}`,
     "",
-    "--- 工具调用轨迹 (pi 真实执行) ---",
+    "--- 工具调用轨迹 (pi 真实执行：迁移 + 跑测 + 更新记忆) ---",
     formatToolTrace(s3),
     "",
     "--- 模型最终回复 ---",
     s3.finalAnswer,
     "",
+    `--- 删除动作实测 (独立 pi 会话，${sDel.provider} / ${sDel.model}, turns=${sDel.turns}) ---`,
+    formatToolTrace(sDel),
+    "",
     `--- 更新后 OKF 文件 (${updatedRecord.filePath}, rev ${updatedRecord.revision}) ---`,
     updatedFileContent,
     "",
-    "--- 审计日志 log.md ---",
+    "--- 审计日志 log.md (含 WRITE / UPDATE / DELETE 全链路) ---",
     logContent,
     "",
     `[OKF 完整性校验] VALIDATE PASS (${validationS3.recordCount} records in ${validationS3.storeDir})`,

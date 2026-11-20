@@ -6,25 +6,19 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import List
+
+from .config import EMBED_MODEL, sanitize_no_proxy
 
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 os.environ.setdefault("HF_HUB_VERBOSITY", "error")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
-
-for _var in ("NO_PROXY", "no_proxy"):
-    _val = os.environ.get(_var)
-    if _val and "::1" in _val:
-        _parts = [p.strip() for p in _val.split(",") if p.strip() and p.strip() not in {"::1", "[::1]"}]
-        os.environ[_var] = ",".join(dict.fromkeys(_parts))
-
-import warnings
+sanitize_no_proxy()
 
 warnings.filterwarnings("ignore", message="Cannot enable progress bars.*HF_HUB_DISABLE_PROGRESS_BARS")
 
 from llama_index.core.base.embeddings.base import BaseEmbedding
-
-from .config import EMBED_MODEL
 
 _MODEL_CACHE: dict[str, object] = {}
 

@@ -3,69 +3,48 @@ id: "testing/session-test-entry"
 project: "login_demo"
 type: Procedure
 title: "login_demo 会话测试入口与运行命令"
-description: "login_demo 会话单元测试已迁移至 tests/auth/test_session.py，统一入口为 python -m pytest tests/auth/test_session.py -q，实测 3 passed。"
-tags: ["testing", "pytest", "session", "auth", "entrypoint", "command"]
-sources: ["tests/auth/test_session.py", "docs/testing-guide.md", "docs/session-rules.md", "app/session.py", "python -m pytest tests/auth/test_session.py -q", "python -m pytest -q"]
+description: "login_demo 会话测试已迁移到 tests/auth/test_session.py，统一运行命令为 python -m pytest tests/auth/test_session.py -q。"
+tags: ["testing", "pytest", "session", "auth", "test-path"]
+sources: ["docs/testing-guide.md", "tests/auth/test_session.py", "app/session.py", "app/auth.py", "docs/session-rules.md", "command: python -m pytest tests/auth/test_session.py -q"]
 status: verified
-created_at: "2026-11-20T08:17:12.411Z"
-updated_at: "2026-11-20T08:17:41.683Z"
+created_at: "2026-11-20T09:36:44.065Z"
+updated_at: "2026-11-20T09:37:08.249Z"
 revision: 2
 ---
 
-## 结论
+## 测试路径
 
-| 项 | 值 |
-| --- | --- |
-| 测试文件 | `tests/auth/test_session.py`（原 `tests/test_session.py` 已迁走，旧路径不存在） |
-| 运行命令（CI 唯一认可形式） | `python -m pytest tests/auth/test_session.py -q` |
-| 全量执行命令 | `python -m pytest -q` |
-| 实测结果 | `3 passed in 0.01s`（2026-11-20 在本工作区执行，单文件与全量均通过） |
+- 测试文件：`tests/auth/test_session.py`（会话单元测试，唯一测试入口文件）
+- 被测实现：`app/session.py`（`is_session_valid`、`refresh_expiry`、`SESSION_TTL_SECONDS`）与 `app/auth.py`
+- 规则依据：`docs/session-rules.md`、`docs/testing-guide.md`
 
-## 运行步骤
+## 运行命令
 
 ```bash
-# 1. 在项目根目录（包含 app/、docs/、tests/ 的那一层）执行
-cd runs/pi_live_workspace
-
-# 2. 如有虚拟环境则先激活（当前无 .venv，可跳过，见下方"环境差异"）
-source .venv/bin/activate
-
-# 3. 跑测试
 python -m pytest tests/auth/test_session.py -q
-
-# 4. 或跑全部测试
-python -m pytest -q
 ```
 
-## 硬性约定（来自测试指南）
+- 必须使用 `python -m pytest` 形式，CI 只认这种写法；不要直接敲 `pytest tests/auth/test_session.py`。
+- 指南要求运行前 `source .venv/bin/activate`；但当前工作区根目录下**不存在** `.venv`，直接运行上述命令即可通过（2026-11-20 实测 3 passed）。
+- 全量测试可运行 `python -m pytest tests -q`，同样为 3 passed。
+- 测试文件内部已自行把项目根目录插入 `sys.path`，从任意子目录执行也能定位 `app` 包。
 
-- 必须使用 `python -m pytest ...`，**不要**直接敲 `pytest tests/auth/test_session.py`；项目 CI 只认 `python -m pytest` 形式。
-- 不要修改测试文件来让测试变绿，测试文件由维护者负责。
-- 新增功能需补对应用例，并在提交说明中写明用例名。
+## 关键用例
 
-## 关键用例与语义
+| 用例 | 覆盖点 |
+| --- | --- |
+| `test_expire_boundary` | `now == expires_at` 返回 `False`；到期前 1 秒返回 `True` |
+| `test_refresh_extends_ttl` | 续期后到期时间后推 `SESSION_TTL_SECONDS`（30 分钟） |
+| `test_logout_invalidates` | `logout` 后同一令牌判无效；重复 logout 返回 `False` |
 
-- `test_expire_boundary`：`now == expires_at` 必须为 `False`；`expires_at - 1` 为 `True`。
-- `test_refresh_extends_ttl`：续期后到期时间 = 请求到达时刻 + `SESSION_TTL_SECONDS`（30 分钟 = 1800 秒）。
-- `test_logout_invalidates`：`logout` 后同一令牌立即失效，且重复 `logout` 返回 `False`。
+## 约定与坑点
 
-规则依据：`docs/session-rules.md` 要求有效条件写作 `now < expires_at`，禁止 `now <= expires_at`（`app/session.py` 中 `is_session_valid` 已按此实现）。
-
-## 迁移说明
-
-- 测试已从 `tests/test_session.py` 移动到 `tests/auth/test_session.py`。
-- 测试文件内部的根目录探测逻辑基于 `Path(__file__)` 向上查找 `app/` 目录，移动后无需改动即可从新路径导入 `app.*`。
-- `docs/testing-guide.md` 的"测试入口"已同步更新为新路径，`updated` 改为 `2026-11-20`。
-
-## 环境差异（已核对，需注意）
-
-- `docs/testing-guide.md` 要求"运行前先激活虚拟环境：`source .venv/bin/activate`"，但当前工作区**没有 `.venv` 目录**。
-- 实测直接用系统 `python`（Python 3.11.2，pytest 9.2.0）即可通过，无需激活虚拟环境。
-- 若后续新建 `.venv`，再按文档先激活。
+- 到期边界语义：有效条件为 `now < expires_at`，等于到期时刻即视为过期。
+- 不要为通过测试而修改测试文件（由维护者负责）；新增功能需补对应用例并在提交说明写明用例名。
+- 旧路径 `tests/test_session.py` 已不存在，引用测试入口时不要再用它。
 
 ## 核对清单
 
-1. `tests/auth/test_session.py` 是否存在，是否仍包含上述 3 个用例；旧 `tests/test_session.py` 应不存在。
-2. `docs/testing-guide.md` 的"测试入口"是否仍为 `python -m pytest tests/auth/test_session.py -q`。
-3. 重新执行该命令确认全绿，若用例数变化需更新本记忆。
-4. `app/session.py` 中 `SESSION_TTL_SECONDS` 是否仍为 `30 * 60`。
+1. `ls tests/auth/test_session.py app/session.py docs/testing-guide.md` 确认文件仍在。
+2. 运行 `python -m pytest tests/auth/test_session.py -q`，期望 `3 passed`。
+3. 若用例数量、目录或文件名变化，更新本条记忆。

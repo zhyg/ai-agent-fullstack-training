@@ -1,19 +1,19 @@
 ========================================================================
 步骤 1（真实 pi 会话 1）：读取测试文件与说明 -> 写入项目长期记忆
 ========================================================================
-调用模型  : deepseek / deepseek-v4-flash (turns=6, tokens=29151)
+调用模型  : deepseek / deepseek-v4-flash (turns=5, tokens=20716)
 挂载扩展  : extensions/project-memory.ts (PI_MEMORY_PROJECT_ID=login_demo)
 提示词    : 读取当前项目的会话测试文件和测试说明，将测试路径和运行命令保存到项目长期记忆，附上来源。返回实际保存路径。
 
 --- 工具调用轨迹 (pi 真实执行) ---
-  (1) [OK] bash({"command":"ls -la; echo \"---\"; find . -maxdepth 2 -type f | head -50"})
+  (1) [OK] bash({"command":"pwd && ls -la && find . -maxdepth 3 -type f | head -50"})
+      /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace
       total 0
-      drwxr-xr-x 5 antigravity antigravity  42 Nov 20 08:17 .
-      drwxr-xr-x 3 antigravity antigravity 145 Nov 20 08:17 ..
-      drwxr-xr-x 2 antigravity antigravity  75 Nov 20 08:17 app
-      drwxr-xr-x 2 antigravity antigravity  54 Nov 20 08:17 docs
-      drwxr-xr-x 2 antigravity antigravity  29 Nov 20 08:17 tests
-      ---
+      drwxr-xr-x 5 antigravity antigravity  42 Nov 20 09:36 .
+      drwxr-xr-x 4 antigravity antigravity 139 Nov 20 09:36 ..
+      drwxr-xr-x 2 antigravity antigravity  75 Nov 20 09:36 app
+      drwxr-xr-x 2 antigravity antigravity  54 Nov 20 09:36 docs
+      drwxr-xr-x 2 antigravity antigravity  29 Nov 20 09:36 tests
       ./app/__init__.py
       ./app/auth.py
       ./app/config.py
@@ -21,73 +21,38 @@
       ./docs/session-rules.md
       ./docs/testing-guide.md
       ./tests/test_session.py
-  (2) [OK] bash({"command":"find . -path ./node_modules -prune -o -iname \"*test*\" -print -o -iname \"*spec*\" -print | head -40"})
-      ./docs/testing-guide.md
-      ./tests
-      ./tests/test_session.py
+  (2) [OK] read({"path":"docs/testing-guide.md"})
+      --- | service: login_demo ... (共 26 行)
   (3) [OK] read({"path":"tests/test_session.py"})
       """login_demo 登录会话单元测试（对齐 docs/testing-guide.md）。""" |  ... (共 48 行)
-  (4) [OK] read({"path":"docs/testing-guide.md"})
-      --- | service: login_demo ... (共 26 行)
+  (4) [OK] bash({"command":"cd /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace && python -m pytest tests/test_session.py -q 2>&1 | tail -20; echo \"---\"; ls -la .venv 2>/dev/null || echo \"no .venv\""})
+      ...                                                                      [100%]
+      3 passed in 0.02s
+      ---
+      no .venv
   (5) [OK] read({"path":"app/session.py"})
       """登录会话的判定实现。 |  ... (共 20 行)
   (6) [OK] read({"path":"docs/session-rules.md"})
       --- | service: login_demo ... (共 31 行)
-  (7) [OK] bash({"command":"ls -a; echo \"--- venv?\"; [ -d .venv ] && echo \".venv exists\" || echo \".venv missing\"; echo \"--- python\"; python --version 2>&1; python -m pytest --version 2>&1 | head -3"})
-      .
-      ..
-      app
-      docs
-      tests
-      --- venv?
-      .venv missing
-      --- python
-      Python 3.11.2
-      pytest 9.2.0
-  (8) [OK] bash({"command":"cd /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/pi_live_workspace && python -m pytest tests/test_session.py -q 2>&1 | tail -15"})
-      ...                                                                      [100%]
-      3 passed in 0.02s
-  (9) [OK] project_memory_write({"id":"testing/session-test-entry","title":"login_demo 会话测试入口与运行命令","description":"login_demo 会话单元测试位于 tests/test_session.py，统一入口为 python -m pytest tests/test_session.py -q，已实测 3 passed。","type":"Procedure","status":"verified","tags":["login_demo","testing","pytest","session","ci-entry"],"sources":["tests/test_session.py","docs/testing-guide.md","docs/session-rules.md","app/session.py","python -m pytest tests/test_session.py -q"],"body":"## 结论\\n\\n| 项 | 值 |\\n| --- | --- |\\n| 测试文件 | `tests/test_session.py` |\\n| 运行命令... (1391 chars)"})
+  (7) [OK] project_memory_write({"id":"testing/session-test-entry","title":"login_demo 会话测试入口与运行命令","description":"会话单元测试统一入口为 python -m pytest tests/test_session.py -q，覆盖到期边界、续期与登出失效三个用例。","type":"Procedure","status":"verified","tags":["testing","pytest","session","login_demo","run-command"],"sources":["docs/testing-guide.md","tests/test_session.py","app/session.py","docs/session-rules.md","command: python -m pytest tests/test_session.py -q"],"body":"## 测试路径\\n\\n- 测试文件：`tests/test_session.py`（会话单元测试，唯一测试入口文件）\\n- 被测实现：`app/ses... (1058 chars)"})
       已写入项目长期记忆：testing/session-test-entry (rev 1)
       项目标识：login_demo
       实际保存路径：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
       目录文件：/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/index.md
-      来源：tests/test_session.py, docs/testing-guide.md, docs/session-rules.md, app/session.py, python -m pytest tests/test_session.py -q
-  (10) [OK] bash({"command":"cat /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md"})
-      ---
-      id: "testing/session-test-entry"
-      project: "login_demo"
-      type: Procedure
-      title: "login_demo 会话测试入口与运行命令"
-      description: "login_demo 会话单元测试位于 tests/test_session.py，统一入口为 python -m pytest tests/test_session.py -q，已实测 3 passed。"
-      tags: ["login_demo", "testing", "pytest", "session", "ci-entry"]
-      sources: ["tests/test_session.py", "docs/testing-guide.md", "docs/session-rules.md", "app/session.py", "python -m pytest tests/test_session.py -q"]
-      status: verified
-      created_at: "2026-11-20T08:17:12.411Z"
-      updated_at: "2026-11-20T08:17:12.411Z"
-      revision: 1
-      ---
-      
-      ... (共 61 行，已截断)
+      来源：docs/testing-guide.md, tests/test_session.py, app/session.py, docs/session-rules.md, command: python -m pytest tests/test_session.py -q
 
 --- 模型最终回复 ---
-已完成并写入项目长期记忆。
+已保存到项目长期记忆。
 
-**实际保存路径：**
-```
-/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
-```
-索引文件：`.../runs/okf-memory-store/login_demo/index.md`（记忆 id：`testing/session-test-entry`，rev 1，status: verified）
+**实际保存路径**：`/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md`（id: `testing/session-test-entry`, rev 1）
 
-**写入内容要点**
+内容核对依据：
 - 测试文件：`tests/test_session.py`
-- 运行命令（CI 唯一认可）：`python -m pytest tests/test_session.py -q`
-- 实测结果：`3 passed in 0.02s`（Python 3.11.2 / pytest 9.2.0）
-- 三个用例语义：到期边界 `now == expires_at` → `False`、续期 +1800s、`logout` 后立即失效
-- 硬性约定：禁止直接 `pytest ...`、禁止改测试文件
-- 环境差异（已核实）：`docs/testing-guide.md` 要求 `source .venv/bin/activate`，但工作区无 `.venv`，当前可直接用系统 python 运行
+- 测试说明：`docs/testing-guide.md`、`docs/session-rules.md`
+- 被测实现：`app/session.py`
+- 实测命令通过：`python -m pytest tests/test_session.py -q` → `3 passed in 0.02s`
 
-**来源**：`tests/test_session.py`、`docs/testing-guide.md`、`docs/session-rules.md`、`app/session.py`，以及实际执行的命令输出。
+注意点已记入：指南要求 `source .venv/bin/activate`，但当前工作区无 `.venv`，直接运行命令即可；必须用 `python -m pytest` 形式。
 
 --- 落盘 OKF 文件预览 (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md) ---
 ---
@@ -95,60 +60,47 @@ id: "testing/session-test-entry"
 project: "login_demo"
 type: Procedure
 title: "login_demo 会话测试入口与运行命令"
-description: "login_demo 会话单元测试位于 tests/test_session.py，统一入口为 python -m pytest tests/test_session.py -q，已实测 3 passed。"
-tags: ["login_demo", "testing", "pytest", "session", "ci-entry"]
-sources: ["tests/test_session.py", "docs/testing-guide.md", "docs/session-rules.md", "app/session.py", "python -m pytest tests/test_session.py -q"]
+description: "会话单元测试统一入口为 python -m pytest tests/test_session.py -q，覆盖到期边界、续期与登出失效三个用例。"
+tags: ["testing", "pytest", "session", "login_demo", "run-command"]
+sources: ["docs/testing-guide.md", "tests/test_session.py", "app/session.py", "docs/session-rules.md", "command: python -m pytest tests/test_session.py -q"]
 status: verified
-created_at: "2026-11-20T08:17:12.411Z"
-updated_at: "2026-11-20T08:17:12.411Z"
+created_at: "2026-11-20T09:36:44.065Z"
+updated_at: "2026-11-20T09:36:44.065Z"
 revision: 1
 ---
 
-## 结论
+## 测试路径
 
-| 项 | 值 |
-| --- | --- |
-| 测试文件 | `tests/test_session.py` |
-| 运行命令（CI 唯一认可形式） | `python -m pytest tests/test_session.py -q` |
-| 实测结果 | `3 passed in 0.02s`（2026-11-20 在本工作区执行） |
+- 测试文件：`tests/test_session.py`（会话单元测试，唯一测试入口文件）
+- 被测实现：`app/session.py`（`is_session_valid`、`refresh_expiry`、`SESSION_TTL_SECONDS`）与 `app/auth.py`
+- 规则依据：`docs/session-rules.md`、`docs/testing-guide.md`
 
-## 运行步骤
+## 运行命令
 
 ```bash
-# 1. 在项目根目录（包含 app/、docs/、tests/ 的那一层）执行
-cd runs/pi_live_workspace
-
-# 2. 如有虚拟环境则先激活（见下方"环境差异"）
-source .venv/bin/activate   # 本工作区当前不存在 .venv，可跳过
-
-# 3. 跑测试
 python -m pytest tests/test_session.py -q
 ```
 
-## 硬性约定（来自测试指南）
+- 必须使用 `python -m pytest` 形式，CI 只认这种写法；不要直接敲 `pytest tests/test_session.py`。
+- 指南要求运行前 `source .venv/bin/activate`；但当前工作区根目录下**不存在** `.venv`，直接运行上述命令即可通过（实测 3 passed in 0.02s）。若后续新增虚拟环境，先激活再运行。
+- 测试文件内部已自行把项目根目录插入 `sys.path`，从任意子目录执行也能定位 `app` 包。
 
-- 必须使用 `python -m pytest ...`，**不要**直接敲 `pytest tests/test_session.py`；项目 CI 只认 `python -m pytest` 形式。
-- 不要修改测试文件来让测试变绿，测试文件由维护者负责。
-- 新增功能需补对应用例，并在提交说明中写明用例名。
+## 关键用例
 
-## 关键用例与语义
+| 用例 | 覆盖点 |
+| --- | --- |
+| `test_expire_boundary` | `now == expires_at` 返回 `False`；到期前 1 秒返回 `True` |
+| `test_refresh_extends_ttl` | 续期后到期时间后推 `SESSION_TTL_SECONDS`（30 分钟） |
+| `test_logout_invalidates` | `logout` 后同一令牌判无效；重复 logout 返回 `False` |
 
-- `test_expire_boundary`：`now == expires_at` 必须为 `False`；`expires_at - 1` 为 `True`。
-- `test_refresh_extends_ttl`：续期后到期时间 = 请求到达时刻 + `SESSION_TTL_SECONDS`（30 分钟 = 1800 秒）。
-- `test_logout_invalidates`：`logout` 后同一令牌立即失效，且重复 `logout` 返回 `False`。
+## 约定与坑点
 
-规则依据：`docs/session-rules.md` 要求有效条件写作 `now < expires_at`，禁止 `now <= expires_at`（`app/session.py` 中 `is_session_valid` 已按此实现）。
-
-## 环境差异（已核对，需注意）
-
-- `docs/testing-guide.md` 要求"运行前先激活虚拟环境：`source .venv/bin/activate`"，但当前工作区**没有 `.venv` 目录**。
-- 实测直接用系统 `python`（Python 3.11.2，pytest 9.2.0）即可通过，无需激活虚拟环境。
-- 若后续新建 `.venv`，再按文档先激活。
+- 到期边界语义：有效条件为 `now < expires_at`，等于到期时刻即视为过期。
+- 不要为通过测试而修改测试文件（由维护者负责）；新增功能需补对应用例并在提交说明写明用例名。
 
 ## 核对清单
 
-1. `tests/test_session.py` 是否存在，是否仍包含上述 3 个用例。
-2. `docs/testing-guide.md` 的"测试入口"是否仍为 `python -m pytest tests/test_session.py -q`。
-3. 重新执行该命令确认全绿，若用例数变化需更新本记忆。
-4. `app/session.py` 中 `SESSION_TTL_SECONDS` 是否仍为 `30 * 60`。
+1. `ls tests/test_session.py app/session.py docs/testing-guide.md` 确认文件仍在。
+2. 运行 `python -m pytest tests/test_session.py -q`，期望 `3 passed`。
+3. 若用例数量或文件名变化，更新本条记忆。
 ========================================================================

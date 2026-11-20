@@ -16,6 +16,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { Type } from "@sinclair/typebox";
 import {
   ProjectMemoryStore,
+  formatSourceChecks,
   verifyMemorySources,
   type MemoryStatus,
   type MemoryType,
@@ -133,13 +134,7 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
       }
       const sections = hits.map((hit, idx) => {
         const rec = hit.record;
-        const checks = (hit.sourceChecks || [])
-          .map((c) =>
-            c.kind === "file"
-              ? `  - [文件] ${c.source} -> ${c.exists ? "存在" : "不存在"} (${c.resolvedPath})`
-              : `  - [依据] ${c.source}`
-          )
-          .join("\n");
+        const checks = hit.sourceChecks ? formatSourceChecks(hit.sourceChecks, { indent: "  " }) : "";
         return [
           `[${idx + 1}] ${rec.id} | ${rec.title} (rev ${rec.revision}, ${rec.status}, score=${hit.score})`,
           `路径：${rec.filePath}`,
@@ -177,17 +172,13 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
         });
       }
       const checks = verifyMemorySources(store.projectRoot, record.sources);
-      const checkLines = checks.map((c) =>
-        c.kind === "file"
-          ? `- ${c.source}: ${c.exists ? "存在" : "不存在"} (${c.resolvedPath})`
-          : `- ${c.source}: 非文件路径依据`
-      );
+      const checkText = formatSourceChecks(checks, { indent: "" });
       return textResult(
         [
           `ID：${record.id} (rev ${record.revision}, ${record.status})`,
           `标题：${record.title}`,
           `保存路径：${record.filePath}`,
-          `来源核对：\n${checkLines.join("\n")}`,
+          `来源核对：\n${checkText}`,
           "",
           record.body,
         ].join("\n"),
