@@ -1,0 +1,68 @@
+========================================================================
+步骤 2：查询对比与带来源回答 | 问题：登录会话的有效期是多少分钟？
+========================================================================
+
+--- 1) 向量检索 (BGE-small-zh-v1.5) (Top-5) ---
+  [1] score=0.731568 | 来源: docs/session-rules.md § 登录会话有效期规则 > 有效期长度
+      node_id=docs/session-rules.md::chunk_1
+      摘录: ## 有效期长度  - 管理后台的登录会话有效期为 30 分钟。 - 计时方式：从签发时刻开始计算，30 分钟后到期。 - 空闲会话不自动续期，必须由用户请求触发刷新。
+  [2] score=0.661100 | 来源: app/session.py § (整文件)
+      node_id=app/session.py::chunk_0
+      摘录: """登录会话的判定实现。  本模块只负责"令牌是否仍然有效"的判断，不负责签发和存储。 """  SESSION_TTL_SECONDS = 30 * 60  # 登录会话有效期，单位秒  def ...
+  [3] score=0.661069 | 来源: docs/session-rules.md § 登录会话有效期规则 > 续期
+      node_id=docs/session-rules.md::chunk_3
+      摘录: ## 续期  - 用户发起请求后，服务在响应返回前刷新 `expires_at`。 - 新的到期时间 = 请求到达时刻 + 30 分钟。
+  [4] score=0.659367 | 来源: docs/session-rules.md § 登录会话有效期规则
+      node_id=docs/session-rules.md::chunk_0
+      摘录: # 登录会话有效期规则  适用服务：login_demo 登录服务。
+  [5] score=0.646710 | 来源: docs/payment-session.md § 支付会话规则 > 有效期长度
+      node_id=docs/payment-session.md::chunk_1
+      摘录: ## 有效期长度  - 支付会话有效期为 5 分钟。 - 超时后订单进入 `PAY_TIMEOUT` 状态，需要用户重新下单。
+
+--- 2) 关键词检索 (BM25 + jieba) (Top-5) ---
+  [1] score=6.330292 | 来源: tables/session-matrix.csv § (正文)
+      node_id=tables/session-matrix.csv::chunk_0
+      摘录: 服务是login_demo；会话类型是登录会话；有效期是30 分钟；可续期是是；到期边界处理是恰好到期视为无效；负责人是认证组。 服务是pay_gateway；会话类型是支付会话；有效期是5 分钟；可...
+  [2] score=4.868004 | 来源: docs/payment-session.md § 支付会话规则 > 与登录会话的区别
+      node_id=docs/payment-session.md::chunk_3
+      摘录: ## 与登录会话的区别  - 登录会话 30 分钟、可续期；支付会话 5 分钟、不可续期。 - 两者共用 `expires_at` 字段名，排查问题时先确认是哪个服务的会话。
+  [3] score=4.209045 | 来源: app/config.py § (整文件)
+      node_id=app/config.py::chunk_0
+      摘录: """项目配置。  注意：这里的 SESSION_TTL_MINUTES 是运维覆盖用的，默认值为空。 真正的默认有效期常量在 app/session.py。 """  import os  # 允许...
+  [4] score=3.704189 | 来源: docs/session-rules.md § 登录会话有效期规则 > 有效期长度
+      node_id=docs/session-rules.md::chunk_1
+      摘录: ## 有效期长度  - 管理后台的登录会话有效期为 30 分钟。 - 计时方式：从签发时刻开始计算，30 分钟后到期。 - 空闲会话不自动续期，必须由用户请求触发刷新。
+  [5] score=2.865675 | 来源: docs/session-rules.md § 登录会话有效期规则 > 续期
+      node_id=docs/session-rules.md::chunk_3
+      摘录: ## 续期  - 用户发起请求后，服务在响应返回前刷新 `expires_at`。 - 新的到期时间 = 请求到达时刻 + 30 分钟。
+
+--- 3) RRF 混合检索 (k=60) (Top-5) ---
+  [1] score=0.032018 | 来源: docs/session-rules.md § 登录会话有效期规则 > 有效期长度
+      node_id=docs/session-rules.md::chunk_1
+      摘录: ## 有效期长度  - 管理后台的登录会话有效期为 30 分钟。 - 计时方式：从签发时刻开始计算，30 分钟后到期。 - 空闲会话不自动续期，必须由用户请求触发刷新。
+  [2] score=0.031281 | 来源: app/session.py § (整文件)
+      node_id=app/session.py::chunk_0
+      摘录: """登录会话的判定实现。  本模块只负责"令牌是否仍然有效"的判断，不负责签发和存储。 """  SESSION_TTL_SECONDS = 30 * 60  # 登录会话有效期，单位秒  def ...
+  [3] score=0.031258 | 来源: docs/session-rules.md § 登录会话有效期规则 > 续期
+      node_id=docs/session-rules.md::chunk_3
+      摘录: ## 续期  - 用户发起请求后，服务在响应返回前刷新 `expires_at`。 - 新的到期时间 = 请求到达时刻 + 30 分钟。
+  [4] score=0.030331 | 来源: docs/session-rules.md § 登录会话有效期规则
+      node_id=docs/session-rules.md::chunk_0
+      摘录: # 登录会话有效期规则  适用服务：login_demo 登录服务。
+  [5] score=0.030282 | 来源: tables/session-matrix.csv § (正文)
+      node_id=tables/session-matrix.csv::chunk_0
+      摘录: 服务是login_demo；会话类型是登录会话；有效期是30 分钟；可续期是是；到期边界处理是恰好到期视为无效；负责人是认证组。 服务是pay_gateway；会话类型是支付会话；有效期是5 分钟；可...
+
+========================================================================
+基于 RRF 混合检索证据生成带来源引用的回答
+========================================================================
+提示：当前环境未配置大模型 API Key，跳过在线大模型调用。
+配置 DEEPSEEK_API_KEY / MINIMAX_API_KEY / OPENAI_API_KEY 后重新执行即可调用真实模型生成回答。
+
+【引用来源清单（与 [编号] 一一对应）】
+  [1] docs/session-rules.md § 登录会话有效期规则 > 有效期长度 (score=0.032018)
+  [2] app/session.py § (整文件) (score=0.031281)
+  [3] docs/session-rules.md § 登录会话有效期规则 > 续期 (score=0.031258)
+  [4] docs/session-rules.md § 登录会话有效期规则 (score=0.030331)
+  [5] tables/session-matrix.csv § (正文) (score=0.030282)
+========================================================================

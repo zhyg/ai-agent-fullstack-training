@@ -1,0 +1,628 @@
+[
+  {
+    "node_id": "app/auth.py::chunk_0",
+    "ref_doc_id": "app/auth.py",
+    "text": "\"\"\"登录与退出的入口。\n\n本模块负责令牌的生命周期：签发、校验、续期、失效。\n退出登录功能尚未实现，见 logout() 的 TODO。\n\"\"\"\n\nfrom __future__ import annotations\n\nimport hashlib\nimport hmac\nimport secrets\nimport time\n\nfrom .session import SESSION_TTL_SECONDS, is_session_valid, refresh_expiry\n\n_TOKEN_STORE: dict[str, dict] = {}\n_SECRET = b\"login-demo-secret\"\n\ndef _sign(token: str) -> str:\n    \"\"\"给令牌做一次 HMAC，防止客户端伪造。\"\"\"\n    return hmac.new(_SECRET, token.encode(), hashlib.sha256).hexdigest()[:16]\n\ndef issue_token(user_id: str, now: int | None = None) -> str:\n    \"\"\"签发一个新的会话令牌，并把到期时间写进存储。\"\"\"\n    now = int(now if now is not None else time.time())\n    raw = f\"{user_id}.{now}.{secrets.token_hex(8)}\"\n    token = f\"{raw}.{_sign(raw)}\"\n    _TOKEN_STORE[token] = {\n        \"user_id\": user_id,\n        \"issued_at\": now,\n        \"expires_at\": refresh_expiry(now),\n    }\n    return token\n\ndef verify_token(token: str) -> bool:\n    \"\"\"校验签名，签名不对直接判为无效。\"\"\"\n    if token.count(\".\") != 3:\n        return False\n    raw, signature = token.rsplit(\".\", 1)\n    return hmac.compare_digest(_sign(raw), signature)\n\ndef check(token: str, now: int | None = None) -> bool:\n    \"\"\"按令牌查询会话是否有效。\"\"\"\n    if not verify_token(token):\n        return False\n    record = _TOKEN_STORE.get(token)\n    if record is None:\n        return False\n    now = int(now if now is not None else time.time())\n    return is_session_valid(now, record[\"expires_at\"])\n\ndef expire_at(token: str) -> int | None:\n    \"\"\"返回令牌的到期时间戳，令牌不存在时返回 None。\"\"\"\n    record = _TOKEN_STORE.get(token)\n    return record[\"expires_at\"] if record else None\n\ndef touch(token: str, now: int | None = None) -> int | None:\n    \"\"\"用户有请求时续期，返回新的到期时间。\"\"\"\n    record = _TOKEN_STORE.get(token)\n    if record is None:\n        return None\n    now = int(now if now is not None else time.time())\n    if not is_session_valid(now, record[\"expires_at\"]):\n        return None\n    record[\"expires_at\"] = refresh_expiry(now)\n    return record[\"expires_at\"]\n\ndef purge_expired(now: int | None = None) -> int:\n    \"\"\"清理已过期的记录，返回清理条数。\"\"\"\n    now = int(now if now is not None else time.time())\n    dead = [t for t, r in _TOKEN_STORE.items() if not is_session_valid(now, r[\"expires_at\"])]\n    for token in dead:\n        _TOKEN_STORE.pop(token, None)\n    return len(dead)\n\ndef logout(token: str) -> None:\n    \"\"\"退出登录：让令牌立即失效。\n\n    TODO: 尚未实现。需要删除 _TOKEN_STORE 中的记录，\n    并按 docs/testing-guide.md 补一条 test_logout_invalidates 用例。\n    \"\"\"\n    raise NotImplementedError(\"logout is not implemented yet\")",
+    "metadata": {
+      "file_path": "app/auth.py",
+      "doc_type": "code",
+      "source": "py",
+      "content_hash": "6f62febaf33bf1292fee20dadf55c8c59ca92589f09bd5b20d90ca1867889442",
+      "heading": "(整文件)",
+      "header_path": "",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "app/config.py::chunk_0",
+    "ref_doc_id": "app/config.py",
+    "text": "\"\"\"项目配置。\n\n注意：这里的 SESSION_TTL_MINUTES 是运维覆盖用的，默认值为空。\n真正的默认有效期常量在 app/session.py。\n\"\"\"\n\nimport os\n\n# 允许运维通过环境变量覆盖登录会话有效期（分钟）。\nSESSION_TTL_MINUTES = os.environ.get(\"SESSION_TTL_MINUTES\", \"\")",
+    "metadata": {
+      "file_path": "app/config.py",
+      "doc_type": "code",
+      "source": "py",
+      "content_hash": "b8ca51f475a15369ba3574ddd6d05f5f24c91417b813dd9edfeed9065e47a4f4",
+      "heading": "(整文件)",
+      "header_path": "",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "app/session.py::chunk_0",
+    "ref_doc_id": "app/session.py",
+    "text": "\"\"\"登录会话的判定实现。\n\n本模块只负责\"令牌是否仍然有效\"的判断，不负责签发和存储。\n\"\"\"\n\nSESSION_TTL_SECONDS = 30 * 60  # 登录会话有效期，单位秒\n\ndef is_session_valid(now, expires_at):\n    \"\"\"判断会话在 now 时刻是否有效。\n\n    参数都是 Unix 时间戳（秒）。\n    到期时刻本身视为已过期。\n    \"\"\"\n    return now < expires_at\n\ndef refresh_expiry(now):\n    \"\"\"返回续期后的新到期时间。\"\"\"\n    return now + SESSION_TTL_SECONDS",
+    "metadata": {
+      "file_path": "app/session.py",
+      "doc_type": "code",
+      "source": "py",
+      "content_hash": "9eec7917294a60b522ed758edabdabca6e56f50299837772781453eedbfc2c94",
+      "heading": "(整文件)",
+      "header_path": "",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "docs/faq.md::chunk_0",
+    "ref_doc_id": "docs/faq.md",
+    "text": "# 常见问题（FAQ）",
+    "metadata": {
+      "file_path": "docs/faq.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "c28750172fb917b2b78da56a9f8649858b9d8a62c1f324f49ea0554f456944c2",
+      "service": "login_demo",
+      "topic": "troubleshooting",
+      "owner": "认证组",
+      "updated": "2026-09-25",
+      "heading": "常见问题（FAQ）",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "docs/faq.md::chunk_1",
+    "ref_doc_id": "docs/faq.md",
+    "text": "## 用户反馈\"登录状态老是掉\"\n\n1. 先确认会话有效期配置是否被改过，默认 30 分钟。\n2. 再看是不是恰好卡在到期时刻被判定为无效，检查边界用例。\n3. 最后确认前端是否在响应里正确保存了新的令牌。",
+    "metadata": {
+      "file_path": "docs/faq.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "c28750172fb917b2b78da56a9f8649858b9d8a62c1f324f49ea0554f456944c2",
+      "service": "login_demo",
+      "topic": "troubleshooting",
+      "owner": "认证组",
+      "updated": "2026-09-25",
+      "heading": "常见问题（FAQ） > 用户反馈\"登录状态老是掉\"",
+      "header_path": "/常见问题（FAQ）/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "docs/faq.md::chunk_2",
+    "ref_doc_id": "docs/faq.md",
+    "text": "## 能否把有效期改长一点\n\n- 可以，但需要产品确认。修改前先读 `docs/session-rules.md`，不要直接改代码常量。",
+    "metadata": {
+      "file_path": "docs/faq.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "c28750172fb917b2b78da56a9f8649858b9d8a62c1f324f49ea0554f456944c2",
+      "service": "login_demo",
+      "topic": "troubleshooting",
+      "owner": "认证组",
+      "updated": "2026-09-25",
+      "heading": "常见问题（FAQ） > 能否把有效期改长一点",
+      "header_path": "/常见问题（FAQ）/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "docs/faq.md::chunk_3",
+    "ref_doc_id": "docs/faq.md",
+    "text": "## 忘记测试命令怎么办\n\n- 见 `docs/testing-guide.md`，入口是 `python -m pytest tests/test_session.py -q`。",
+    "metadata": {
+      "file_path": "docs/faq.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "c28750172fb917b2b78da56a9f8649858b9d8a62c1f324f49ea0554f456944c2",
+      "service": "login_demo",
+      "topic": "troubleshooting",
+      "owner": "认证组",
+      "updated": "2026-09-25",
+      "heading": "常见问题（FAQ） > 忘记测试命令怎么办",
+      "header_path": "/常见问题（FAQ）/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "docs/payment-session.md::chunk_0",
+    "ref_doc_id": "docs/payment-session.md",
+    "text": "# 支付会话规则\n\n适用服务：pay_gateway 收单网关。本文与登录服务无关。",
+    "metadata": {
+      "file_path": "docs/payment-session.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "9354416930cfcb249a9662ce965c59853735b2d9812fe10cb6654f59b3b3dfdd",
+      "service": "pay_gateway",
+      "topic": "session-expiry",
+      "owner": "支付组",
+      "updated": "2026-08-15",
+      "heading": "支付会话规则",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "docs/payment-session.md::chunk_1",
+    "ref_doc_id": "docs/payment-session.md",
+    "text": "## 有效期长度\n\n- 支付会话有效期为 5 分钟。\n- 超时后订单进入 `PAY_TIMEOUT` 状态，需要用户重新下单。",
+    "metadata": {
+      "file_path": "docs/payment-session.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "9354416930cfcb249a9662ce965c59853735b2d9812fe10cb6654f59b3b3dfdd",
+      "service": "pay_gateway",
+      "topic": "session-expiry",
+      "owner": "支付组",
+      "updated": "2026-08-15",
+      "heading": "支付会话规则 > 有效期长度",
+      "header_path": "/支付会话规则/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "docs/payment-session.md::chunk_2",
+    "ref_doc_id": "docs/payment-session.md",
+    "text": "## 到期边界\n\n- 支付会话在 `now >= expires_at` 时置为超时。\n- 与登录会话不同，支付会话到期后不刷新，只能重建。",
+    "metadata": {
+      "file_path": "docs/payment-session.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "9354416930cfcb249a9662ce965c59853735b2d9812fe10cb6654f59b3b3dfdd",
+      "service": "pay_gateway",
+      "topic": "session-expiry",
+      "owner": "支付组",
+      "updated": "2026-08-15",
+      "heading": "支付会话规则 > 到期边界",
+      "header_path": "/支付会话规则/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "docs/payment-session.md::chunk_3",
+    "ref_doc_id": "docs/payment-session.md",
+    "text": "## 与登录会话的区别\n\n- 登录会话 30 分钟、可续期；支付会话 5 分钟、不可续期。\n- 两者共用 `expires_at` 字段名，排查问题时先确认是哪个服务的会话。",
+    "metadata": {
+      "file_path": "docs/payment-session.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "9354416930cfcb249a9662ce965c59853735b2d9812fe10cb6654f59b3b3dfdd",
+      "service": "pay_gateway",
+      "topic": "session-expiry",
+      "owner": "支付组",
+      "updated": "2026-08-15",
+      "heading": "支付会话规则 > 与登录会话的区别",
+      "header_path": "/支付会话规则/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "docs/session-rules.md::chunk_0",
+    "ref_doc_id": "docs/session-rules.md",
+    "text": "# 登录会话有效期规则\n\n适用服务：login_demo 登录服务。",
+    "metadata": {
+      "file_path": "docs/session-rules.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+      "service": "login_demo",
+      "topic": "session-expiry",
+      "owner": "认证组",
+      "updated": "2026-10-01",
+      "heading": "登录会话有效期规则",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "docs/session-rules.md::chunk_1",
+    "ref_doc_id": "docs/session-rules.md",
+    "text": "## 有效期长度\n\n- 管理后台的登录会话有效期为 30 分钟。\n- 计时方式：从签发时刻开始计算，30 分钟后到期。\n- 空闲会话不自动续期，必须由用户请求触发刷新。",
+    "metadata": {
+      "file_path": "docs/session-rules.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+      "service": "login_demo",
+      "topic": "session-expiry",
+      "owner": "认证组",
+      "updated": "2026-10-01",
+      "heading": "登录会话有效期规则 > 有效期长度",
+      "header_path": "/登录会话有效期规则/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "docs/session-rules.md::chunk_2",
+    "ref_doc_id": "docs/session-rules.md",
+    "text": "## 到期边界\n\n- 项目约定：当前时刻恰好等于到期时刻时，会话必须判定为无效。\n- 也就是说，`now == expires_at` 属于已过期。\n- 实现上有效条件写作 `now < expires_at`，不要写成 `now <= expires_at`。",
+    "metadata": {
+      "file_path": "docs/session-rules.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+      "service": "login_demo",
+      "topic": "session-expiry",
+      "owner": "认证组",
+      "updated": "2026-10-01",
+      "heading": "登录会话有效期规则 > 到期边界",
+      "header_path": "/登录会话有效期规则/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "docs/session-rules.md::chunk_3",
+    "ref_doc_id": "docs/session-rules.md",
+    "text": "## 续期\n\n- 用户发起请求后，服务在响应返回前刷新 `expires_at`。\n- 新的到期时间 = 请求到达时刻 + 30 分钟。",
+    "metadata": {
+      "file_path": "docs/session-rules.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+      "service": "login_demo",
+      "topic": "session-expiry",
+      "owner": "认证组",
+      "updated": "2026-10-01",
+      "heading": "登录会话有效期规则 > 续期",
+      "header_path": "/登录会话有效期规则/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "docs/session-rules.md::chunk_4",
+    "ref_doc_id": "docs/session-rules.md",
+    "text": "## 不适用范围\n\n- 本节规则只约束登录会话，不适用于支付会话、匿名浏览会话。",
+    "metadata": {
+      "file_path": "docs/session-rules.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+      "service": "login_demo",
+      "topic": "session-expiry",
+      "owner": "认证组",
+      "updated": "2026-10-01",
+      "heading": "登录会话有效期规则 > 不适用范围",
+      "header_path": "/登录会话有效期规则/",
+      "chunk_index": 4
+    }
+  },
+  {
+    "node_id": "docs/testing-guide.md::chunk_0",
+    "ref_doc_id": "docs/testing-guide.md",
+    "text": "# login_demo 测试指南",
+    "metadata": {
+      "file_path": "docs/testing-guide.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "524507aed1aae8a685618d78f546003a45f7b93adb37435728edb668f5b8cb2c",
+      "service": "login_demo",
+      "topic": "testing",
+      "owner": "认证组",
+      "updated": "2026-09-20",
+      "heading": "login_demo 测试指南",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "docs/testing-guide.md::chunk_1",
+    "ref_doc_id": "docs/testing-guide.md",
+    "text": "## 测试入口\n\n- 统一入口：`python -m pytest tests/test_session.py -q`\n- 不要直接敲 `pytest tests/test_session.py`，项目的 CI 只认 `python -m pytest` 形式。\n- 运行前先激活虚拟环境：`source .venv/bin/activate`。",
+    "metadata": {
+      "file_path": "docs/testing-guide.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "524507aed1aae8a685618d78f546003a45f7b93adb37435728edb668f5b8cb2c",
+      "service": "login_demo",
+      "topic": "testing",
+      "owner": "认证组",
+      "updated": "2026-09-20",
+      "heading": "login_demo 测试指南 > 测试入口",
+      "header_path": "/login_demo 测试指南/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "docs/testing-guide.md::chunk_2",
+    "ref_doc_id": "docs/testing-guide.md",
+    "text": "## 关键用例\n\n- `test_expire_boundary`：覆盖 `now == expires_at`，期望返回 `False`。\n- `test_refresh_extends_ttl`：覆盖续期后到期时间被推后 30 分钟。\n- `test_logout_invalidates`：退出登录后，同一个会话令牌应判定为无效。",
+    "metadata": {
+      "file_path": "docs/testing-guide.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "524507aed1aae8a685618d78f546003a45f7b93adb37435728edb668f5b8cb2c",
+      "service": "login_demo",
+      "topic": "testing",
+      "owner": "认证组",
+      "updated": "2026-09-20",
+      "heading": "login_demo 测试指南 > 关键用例",
+      "header_path": "/login_demo 测试指南/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "docs/testing-guide.md::chunk_3",
+    "ref_doc_id": "docs/testing-guide.md",
+    "text": "## 提交前检查\n\n- 单元测试必须全绿。\n- 不要为了通过测试去修改测试文件，测试文件由维护者负责。\n- 新增功能要补一条对应用例，并在提交说明里写清用例名。",
+    "metadata": {
+      "file_path": "docs/testing-guide.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "524507aed1aae8a685618d78f546003a45f7b93adb37435728edb668f5b8cb2c",
+      "service": "login_demo",
+      "topic": "testing",
+      "owner": "认证组",
+      "updated": "2026-09-20",
+      "heading": "login_demo 测试指南 > 提交前检查",
+      "header_path": "/login_demo 测试指南/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "history/2026-09-12-expiry-bug.md::chunk_0",
+    "ref_doc_id": "history/2026-09-12-expiry-bug.md",
+    "text": "# 故障记录 2026-09-12：到期那一刻仍然可以访问",
+    "metadata": {
+      "file_path": "history/2026-09-12-expiry-bug.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+      "service": "login_demo",
+      "topic": "incident",
+      "owner": "认证组",
+      "recorded": "2026-09-12",
+      "heading": "故障记录 2026-09-12：到期那一刻仍然可以访问",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "history/2026-09-12-expiry-bug.md::chunk_1",
+    "ref_doc_id": "history/2026-09-12-expiry-bug.md",
+    "text": "## 现象\n\n用户报告：令牌显示还剩 0 秒，接口仍然返回 200。",
+    "metadata": {
+      "file_path": "history/2026-09-12-expiry-bug.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+      "service": "login_demo",
+      "topic": "incident",
+      "owner": "认证组",
+      "recorded": "2026-09-12",
+      "heading": "故障记录 2026-09-12：到期那一刻仍然可以访问 > 现象",
+      "header_path": "/故障记录 2026-09-12：到期那一刻仍然可以访问/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "history/2026-09-12-expiry-bug.md::chunk_2",
+    "ref_doc_id": "history/2026-09-12-expiry-bug.md",
+    "text": "## 排查\n\n- 打开 `app/session.py`，发现判断写的是 `now <= expires_at`。\n- 用边界时刻构造请求，`now == expires_at` 返回 True，确认复现。",
+    "metadata": {
+      "file_path": "history/2026-09-12-expiry-bug.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+      "service": "login_demo",
+      "topic": "incident",
+      "owner": "认证组",
+      "recorded": "2026-09-12",
+      "heading": "故障记录 2026-09-12：到期那一刻仍然可以访问 > 排查",
+      "header_path": "/故障记录 2026-09-12：到期那一刻仍然可以访问/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "history/2026-09-12-expiry-bug.md::chunk_3",
+    "ref_doc_id": "history/2026-09-12-expiry-bug.md",
+    "text": "## 修复\n\n- 把比较运算符从 `<=` 改成 `<`。\n- 补一条边界用例，覆盖 `now == expires_at`，期望 False。\n- 运行 `python -m pytest tests/test_session.py -q`，用例通过。",
+    "metadata": {
+      "file_path": "history/2026-09-12-expiry-bug.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+      "service": "login_demo",
+      "topic": "incident",
+      "owner": "认证组",
+      "recorded": "2026-09-12",
+      "heading": "故障记录 2026-09-12：到期那一刻仍然可以访问 > 修复",
+      "header_path": "/故障记录 2026-09-12：到期那一刻仍然可以访问/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "history/2026-09-12-expiry-bug.md::chunk_4",
+    "ref_doc_id": "history/2026-09-12-expiry-bug.md",
+    "text": "## 结论\n\n到期时刻必须判定为无效。这条结论对登录会话长期有效。",
+    "metadata": {
+      "file_path": "history/2026-09-12-expiry-bug.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+      "service": "login_demo",
+      "topic": "incident",
+      "owner": "认证组",
+      "recorded": "2026-09-12",
+      "heading": "故障记录 2026-09-12：到期那一刻仍然可以访问 > 结论",
+      "header_path": "/故障记录 2026-09-12：到期那一刻仍然可以访问/",
+      "chunk_index": 4
+    }
+  },
+  {
+    "node_id": "history/2026-10-06-logout-request.md::chunk_0",
+    "ref_doc_id": "history/2026-10-06-logout-request.md",
+    "text": "# 需求讨论 2026-10-06：增加退出登录功能",
+    "metadata": {
+      "file_path": "history/2026-10-06-logout-request.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+      "service": "login_demo",
+      "topic": "requirement",
+      "owner": "认证组",
+      "recorded": "2026-10-06",
+      "heading": "需求讨论 2026-10-06：增加退出登录功能",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "history/2026-10-06-logout-request.md::chunk_1",
+    "ref_doc_id": "history/2026-10-06-logout-request.md",
+    "text": "## 背景\n\n用户希望主动退出，而不是等 30 分钟自然到期。",
+    "metadata": {
+      "file_path": "history/2026-10-06-logout-request.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+      "service": "login_demo",
+      "topic": "requirement",
+      "owner": "认证组",
+      "recorded": "2026-10-06",
+      "heading": "需求讨论 2026-10-06：增加退出登录功能 > 背景",
+      "header_path": "/需求讨论 2026-10-06：增加退出登录功能/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "history/2026-10-06-logout-request.md::chunk_2",
+    "ref_doc_id": "history/2026-10-06-logout-request.md",
+    "text": "## 需要改的地方\n\n- `app/auth.py`：把 `logout()` 从 `NotImplementedError` 改成真实实现，删除 `_TOKEN_STORE` 里的记录。\n- `app/session.py`：新增 `invalidate(token)` 之类的辅助函数，或直接在 auth 层删除记录，二选一，先按第一种做。\n- `tests/test_session.py`：新增 `test_logout_invalidates`。",
+    "metadata": {
+      "file_path": "history/2026-10-06-logout-request.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+      "service": "login_demo",
+      "topic": "requirement",
+      "owner": "认证组",
+      "recorded": "2026-10-06",
+      "heading": "需求讨论 2026-10-06：增加退出登录功能 > 需要改的地方",
+      "header_path": "/需求讨论 2026-10-06：增加退出登录功能/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "history/2026-10-06-logout-request.md::chunk_3",
+    "ref_doc_id": "history/2026-10-06-logout-request.md",
+    "text": "## 验收标准\n\n- 退出后再用同一个令牌调用 `check()`，返回 False。\n- `python -m pytest tests/test_session.py -q` 全绿。\n- 不修改既有测试文件的期望值。",
+    "metadata": {
+      "file_path": "history/2026-10-06-logout-request.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+      "service": "login_demo",
+      "topic": "requirement",
+      "owner": "认证组",
+      "recorded": "2026-10-06",
+      "heading": "需求讨论 2026-10-06：增加退出登录功能 > 验收标准",
+      "header_path": "/需求讨论 2026-10-06：增加退出登录功能/",
+      "chunk_index": 3
+    }
+  },
+  {
+    "node_id": "history/2026-10-06-logout-request.md::chunk_4",
+    "ref_doc_id": "history/2026-10-06-logout-request.md",
+    "text": "## 未决问题\n\n- 退出登录是否需要同时清理服务端缓存，待运维确认。",
+    "metadata": {
+      "file_path": "history/2026-10-06-logout-request.md",
+      "doc_type": "doc",
+      "source": "md",
+      "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+      "service": "login_demo",
+      "topic": "requirement",
+      "owner": "认证组",
+      "recorded": "2026-10-06",
+      "heading": "需求讨论 2026-10-06：增加退出登录功能 > 未决问题",
+      "header_path": "/需求讨论 2026-10-06：增加退出登录功能/",
+      "chunk_index": 4
+    }
+  },
+  {
+    "node_id": "pdf/PRD-login-2.5.0.pdf::chunk_0",
+    "ref_doc_id": "pdf/PRD-login-2.5.0.pdf",
+    "text": "login_demo 产品需求说明 v2.5.0（草稿）\n文档编号 PRD-LOGIN-025，维护人：认证组。本说明用于规划退出登录功能。\n1. 目标\n用户可以在任意页面点击“退出登录”，服务端立即让该会话令牌失效，不需要等待 30 分钟自然到期。\n2. 令牌失效的判定\n退出登录之后，同一个令牌再次调用 check() 必须返回 False。这条和“到期边界”规则一致：只要不再满足 now\n< expires_at，就判定为无效。\n3. 涉及模块\napp/auth.py  提供  logout()  入口；app/session.py  保存有效期的常量\nSESSION_TTL_SECONDS。两个文件的职责不要混：auth 负责令牌生命周期，session 负责时间判定。\n4. 验收标准\n运行 python -m pytest tests/test_session.py -q，全部用例通过，其中新增用例名为 test_logout_invalidates。\n5. 不做的事情",
+    "metadata": {
+      "file_path": "pdf/PRD-login-2.5.0.pdf",
+      "doc_type": "pdf",
+      "source": "pdf",
+      "content_hash": "fd22246372d7fcdb7cab743b3cec63179a26a28d12cffecb8fe9fdeaba43d2a5",
+      "heading": "(正文)",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "pdf/PRD-login-2.5.0.pdf::chunk_1",
+    "ref_doc_id": "pdf/PRD-login-2.5.0.pdf",
+    "text": "5. 不做的事情\n本次不清理浏览器端缓存，也不修改记住我令牌的有效期。",
+    "metadata": {
+      "file_path": "pdf/PRD-login-2.5.0.pdf",
+      "doc_type": "pdf",
+      "source": "pdf",
+      "content_hash": "fd22246372d7fcdb7cab743b3cec63179a26a28d12cffecb8fe9fdeaba43d2a5",
+      "heading": "(正文)",
+      "header_path": "/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "tables/session-matrix.csv::chunk_0",
+    "ref_doc_id": "tables/session-matrix.csv",
+    "text": "服务是login_demo；会话类型是登录会话；有效期是30 分钟；可续期是是；到期边界处理是恰好到期视为无效；负责人是认证组。\n服务是pay_gateway；会话类型是支付会话；有效期是5 分钟；可续期是否；到期边界处理是到期即置为超时；负责人是支付组。\n服务是login_demo；会话类型是匿名浏览会话；有效期是120 分钟；可续期是是；到期边界处理是到期后重新签发；负责人是认证组。\n服务是login_demo；会话类型是记住我令牌；有效期是30 天；可续期是是；到期边界处理是到期需重新登录；负责人是认证组。",
+    "metadata": {
+      "file_path": "tables/session-matrix.csv",
+      "doc_type": "table",
+      "source": "csv",
+      "content_hash": "e15dbc93c9dda25f1905c5407da6568a8d74ae44e4a6fd9c59ae5ff08ebcd616",
+      "heading": "(正文)",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "web/release-notes-2.4.0.html::chunk_0",
+    "ref_doc_id": "web/release-notes-2.4.0.html",
+    "text": "# login_demo v2.4.0 发布说明\n\n发布日期：2026-09-20。本次发布调整了登录会话的到期判定。",
+    "metadata": {
+      "file_path": "web/release-notes-2.4.0.html",
+      "doc_type": "web",
+      "source": "html",
+      "content_hash": "430eb87bfe96feaf16a20565cd842b85f2724ed3004925318dbc3d46308de34b",
+      "heading": "login_demo v2.4.0 发布说明",
+      "header_path": "/",
+      "chunk_index": 0
+    }
+  },
+  {
+    "node_id": "web/release-notes-2.4.0.html::chunk_1",
+    "ref_doc_id": "web/release-notes-2.4.0.html",
+    "text": "## 变更内容\n\n到期时刻改为判定为无效，修复\"剩 0 秒仍可访问\"的问题。\n\n会话有效期维持 30 分钟不变。\n\n新增响应头 X-Session-Expires-At ，返回续期后的到期时间戳。",
+    "metadata": {
+      "file_path": "web/release-notes-2.4.0.html",
+      "doc_type": "web",
+      "source": "html",
+      "content_hash": "430eb87bfe96feaf16a20565cd842b85f2724ed3004925318dbc3d46308de34b",
+      "heading": "login_demo v2.4.0 发布说明 > 变更内容",
+      "header_path": "/login_demo v2.4.0 发布说明/",
+      "chunk_index": 1
+    }
+  },
+  {
+    "node_id": "web/release-notes-2.4.0.html::chunk_2",
+    "ref_doc_id": "web/release-notes-2.4.0.html",
+    "text": "## 升级注意\n\n依赖旧行为的调用方需要先确认：凡是把到期时刻当成有效的客户端逻辑，都要改成无效。",
+    "metadata": {
+      "file_path": "web/release-notes-2.4.0.html",
+      "doc_type": "web",
+      "source": "html",
+      "content_hash": "430eb87bfe96feaf16a20565cd842b85f2724ed3004925318dbc3d46308de34b",
+      "heading": "login_demo v2.4.0 发布说明 > 升级注意",
+      "header_path": "/login_demo v2.4.0 发布说明/",
+      "chunk_index": 2
+    }
+  },
+  {
+    "node_id": "web/release-notes-2.4.0.html::chunk_3",
+    "ref_doc_id": "web/release-notes-2.4.0.html",
+    "text": "## 已知问题\n\n退出登录接口尚未实现，调用会抛出 NotImplementedError。计划在 v2.5.0 提供。",
+    "metadata": {
+      "file_path": "web/release-notes-2.4.0.html",
+      "doc_type": "web",
+      "source": "html",
+      "content_hash": "430eb87bfe96feaf16a20565cd842b85f2724ed3004925318dbc3d46308de34b",
+      "heading": "login_demo v2.4.0 发布说明 > 已知问题",
+      "header_path": "/login_demo v2.4.0 发布说明/",
+      "chunk_index": 3
+    }
+  }
+]

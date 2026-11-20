@@ -1,0 +1,22 @@
+{
+  "name": "week04-task1-pi-memory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Week 4 Task 1: Project-scoped OKF Long-Term Memory extension for pi coding agent",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "memory": "node --import tsx src/cli.ts",
+    "verify": "node --import tsx scripts/verify_e2e.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@mariozechner/pi-coding-agent": "^0.73.1",
+    "@sinclair/typebox": "^0.34.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

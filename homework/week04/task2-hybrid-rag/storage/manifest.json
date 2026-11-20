@@ -1,0 +1,111 @@
+{
+  "app/auth.py": {
+    "content_hash": "6f62febaf33bf1292fee20dadf55c8c59ca92589f09bd5b20d90ca1867889442",
+    "doc_type": "code",
+    "node_ids": [
+      "app/auth.py::chunk_0"
+    ]
+  },
+  "app/config.py": {
+    "content_hash": "b8ca51f475a15369ba3574ddd6d05f5f24c91417b813dd9edfeed9065e47a4f4",
+    "doc_type": "code",
+    "node_ids": [
+      "app/config.py::chunk_0"
+    ]
+  },
+  "app/session.py": {
+    "content_hash": "9eec7917294a60b522ed758edabdabca6e56f50299837772781453eedbfc2c94",
+    "doc_type": "code",
+    "node_ids": [
+      "app/session.py::chunk_0"
+    ]
+  },
+  "docs/faq.md": {
+    "content_hash": "c28750172fb917b2b78da56a9f8649858b9d8a62c1f324f49ea0554f456944c2",
+    "doc_type": "doc",
+    "node_ids": [
+      "docs/faq.md::chunk_0",
+      "docs/faq.md::chunk_1",
+      "docs/faq.md::chunk_2",
+      "docs/faq.md::chunk_3"
+    ]
+  },
+  "docs/payment-session.md": {
+    "content_hash": "9354416930cfcb249a9662ce965c59853735b2d9812fe10cb6654f59b3b3dfdd",
+    "doc_type": "doc",
+    "node_ids": [
+      "docs/payment-session.md::chunk_0",
+      "docs/payment-session.md::chunk_1",
+      "docs/payment-session.md::chunk_2",
+      "docs/payment-session.md::chunk_3"
+    ]
+  },
+  "docs/session-rules.md": {
+    "content_hash": "bfa3dbaa5c7b1df408032cc94bb23745ddc5afaa0aa10b3eefb7afab6c4bccdb",
+    "doc_type": "doc",
+    "node_ids": [
+      "docs/session-rules.md::chunk_0",
+      "docs/session-rules.md::chunk_1",
+      "docs/session-rules.md::chunk_2",
+      "docs/session-rules.md::chunk_3",
+      "docs/session-rules.md::chunk_4"
+    ]
+  },
+  "docs/testing-guide.md": {
+    "content_hash": "524507aed1aae8a685618d78f546003a45f7b93adb37435728edb668f5b8cb2c",
+    "doc_type": "doc",
+    "node_ids": [
+      "docs/testing-guide.md::chunk_0",
+      "docs/testing-guide.md::chunk_1",
+      "docs/testing-guide.md::chunk_2",
+      "docs/testing-guide.md::chunk_3"
+    ]
+  },
+  "history/2026-09-12-expiry-bug.md": {
+    "content_hash": "776a7b5696632034a89ebeea0459e2924d84192a6221cd2eb65ac1e93d9b8f81",
+    "doc_type": "doc",
+    "node_ids": [
+      "history/2026-09-12-expiry-bug.md::chunk_0",
+      "history/2026-09-12-expiry-bug.md::chunk_1",
+      "history/2026-09-12-expiry-bug.md::chunk_2",
+      "history/2026-09-12-expiry-bug.md::chunk_3",
+      "history/2026-09-12-expiry-bug.md::chunk_4"
+    ]
+  },
+  "history/2026-10-06-logout-request.md": {
+    "content_hash": "384966abf95c71f7f9b7c23df237169754ef4aef7609da23d8b7f4e400fc9df5",
+    "doc_type": "doc",
+    "node_ids": [
+      "history/2026-10-06-logout-request.md::chunk_0",
+      "history/2026-10-06-logout-request.md::chunk_1",
+      "history/2026-10-06-logout-request.md::chunk_2",
+      "history/2026-10-06-logout-request.md::chunk_3",
+      "history/2026-10-06-logout-request.md::chunk_4"
+    ]
+  },
+  "pdf/PRD-login-2.5.0.pdf": {
+    "content_hash": "fd22246372d7fcdb7cab743b3cec63179a26a28d12cffecb8fe9fdeaba43d2a5",
+    "doc_type": "pdf",
+    "node_ids": [
+      "pdf/PRD-login-2.5.0.pdf::chunk_0",
+      "pdf/PRD-login-2.5.0.pdf::chunk_1"
+    ]
+  },
+  "tables/session-matrix.csv": {
+    "content_hash": "e15dbc93c9dda25f1905c5407da6568a8d74ae44e4a6fd9c59ae5ff08ebcd616",
+    "doc_type": "table",
+    "node_ids": [
+      "tables/session-matrix.csv::chunk_0"
+    ]
+  },
+  "web/release-notes-2.4.0.html": {
+    "content_hash": "430eb87bfe96feaf16a20565cd842b85f2724ed3004925318dbc3d46308de34b",
+    "doc_type": "web",
+    "node_ids": [
+      "web/release-notes-2.4.0.html::chunk_0",
+      "web/release-notes-2.4.0.html::chunk_1",
+      "web/release-notes-2.4.0.html::chunk_2",
+      "web/release-notes-2.4.0.html::chunk_3"
+    ]
+  }
+}

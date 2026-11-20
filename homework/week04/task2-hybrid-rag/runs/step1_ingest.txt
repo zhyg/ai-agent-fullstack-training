@@ -1,0 +1,26 @@
+========================================================================
+步骤 1：建立索引（LlamaIndex 向量索引 + BM25 关键词索引）
+========================================================================
+语料目录      : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task2-hybrid-rag/corpus
+索引存储目录  : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task2-hybrid-rag/storage
+Embedding 模型: BAAI/bge-small-zh-v1.5 (真实本地 ONNX 向量)
+文档数量      : 12
+分块节点总数  : 37
+向量索引节点数: 37
+BM25 节点数   : 37
+双路同批对齐  : PASS (node_id 集合完全一致)
+持久化文件    : bm25_nodes.json, default__vector_store.json, docstore.json, graph_store.json, image__vector_store.json, index_store.json, manifest.json
+BM25 索引路径 : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task2-hybrid-rag/storage/bm25_nodes.json
+清单文件路径  : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task2-hybrid-rag/storage/manifest.json
+------------------------------------------------------------------------
+带来源的分块样例：
+  node_id : docs/session-rules.md::chunk_1
+  来源    : docs/session-rules.md § 登录会话有效期规则 > 有效期长度
+  类型    : doc | hash: bfa3dbaa5c7b
+  内容    :
+    ## 有效期长度
+
+    - 管理后台的登录会话有效期为 30 分钟。
+    - 计时方式：从签发时刻开始计算，30 分钟后到期。
+    - 空闲会话不自动续期，必须由用户请求触发刷新。
+========================================================================

@@ -1,0 +1,45 @@
+========================================================================
+步骤 1（会话 1）：读取会话测试文件与说明 -> 写入项目长期记忆持久化存储
+========================================================================
+提示词：读取当前项目的会话测试文件和测试说明，将测试路径和运行命令保存到项目长期记忆，附上来源。返回实际保存路径。
+
+[实测执行] $ python -m pytest tests/test_session.py -q
+  ...                                                                      [100%]
+3 passed in 0.01s
+
+[工具回执] project_memory_write (独立进程执行)：
+WRITE OK
+  id         : testing/session-test-entry
+  project    : login_demo
+  revision   : 1
+  saved_path : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+  index_path : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/index.md
+  sources    : tests/test_session.py, docs/testing-guide.md
+
+[落盘文件预览] /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+---
+id: "testing/session-test-entry"
+project: "login_demo"
+type: Procedure
+title: "login_demo 会话测试入口与运行命令"
+description: "记录 login_demo 会话测试文件路径 tests/test_session.py 与统一运行命令 python -m pytest tests/test_session.py -q。"
+tags: ["testing", "session", "pytest"]
+sources: ["tests/test_session.py", "docs/testing-guide.md"]
+status: verified
+created_at: "2026-11-20T07:43:39.513Z"
+updated_at: "2026-11-20T07:43:39.513Z"
+revision: 1
+---
+
+# 会话测试入口与运行命令
+
+- 测试文件路径：`tests/test_session.py`
+- 统一运行命令：`python -m pytest tests/test_session.py -q`
+- 覆盖用例：`test_expire_boundary`、`test_refresh_extends_ttl`、`test_logout_invalidates`
+- 初次实测结果：`...                                                                      [100%] | 3 passed in 0.01s`
+
+# 核对清单
+
+1. 新会话使用前，先确认 `tests/test_session.py` 与 `docs/testing-guide.md` 是否存在且一致。
+2. 若测试路径迁移，运行新命令验证通过后再更新本记忆。
+========================================================================

@@ -1,0 +1,56 @@
+========================================================================
+步骤 3（项目变化与更新记忆）：迁移测试 -> 修改说明 -> 实测通过 -> 更新记忆
+========================================================================
+提示词：将会话测试迁移到 tests/auth/test_session.py，同步修改测试说明，运行新测试命令。根据实际结果更新原来的长期记忆。
+
+[变更 1] 已迁移文件：tests/test_session.py -> tests/auth/test_session.py
+[变更 2] 已同步更新：docs/testing-guide.md
+[变更前核对] 旧记忆来源检查已准确发现失效路径：tests/test_session.py => MISSING
+
+[实测执行] $ python -m pytest tests/auth/test_session.py -q
+  ...                                                                      [100%]
+3 passed in 0.01s
+
+[工具回执] project_memory_update (rev 1 -> rev 2)：
+UPDATE OK
+  id         : testing/session-test-entry
+  revision   : 2
+  saved_path : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+  sources    : tests/auth/test_session.py, docs/testing-guide.md
+
+[新会话复查] project_memory_search (verifySources=true)：
+[1] testing/session-test-entry (rev 2, score=37.5)
+  title  : login_demo 会话测试入口与运行命令
+  path   : /home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/session-test-entry.md
+  sources: tests/auth/test_session.py, docs/testing-guide.md
+  checks :
+    - [文件] tests/auth/test_session.py => EXISTS
+    - [文件] docs/testing-guide.md => EXISTS
+  body   :
+    # 会话测试入口与运行命令（已迁移更新）
+
+    - 当前测试文件路径：`tests/auth/test_session.py`
+    - 当前统一运行命令：`python -m pytest tests/auth/test_session.py -q`
+    - 历史路径（已失效）：`tests/test_session.py`（已迁移至 `tests/auth/test_session.py`）
+    - 最新实测结果：`...                                                                      [100%] | 3 passed in 0.01s`
+
+    # 核对清单
+
+    1. 确认 `tests/auth/test_session.py` 与 `docs/testing-guide.md` 存在且一致。
+    2. 旧路径 `tests/test_session.py` 已废弃，不得继续沿用。
+
+[删除动作验证] project_memory_delete：
+DELETE OK: testing/temp-debug-note (/home/antigravity/zhyg/ai-agent-fullstack-training/homework/week04/task1-pi-memory/runs/okf-memory-store/login_demo/testing/temp-debug-note.md)
+
+[审计日志 log.md]：
+---
+okf_version: "0.2"
+project: "login_demo"
+---
+
+# login_demo 长期记忆变更日志
+- `2026-11-20T07:43:39.515Z` **WRITE** `testing/session-test-entry` — rev 1 | title="login_demo 会话测试入口与运行命令" | sources=[tests/test_session.py, docs/testing-guide.md]
+- `2026-11-20T07:43:40.242Z` **UPDATE** `testing/session-test-entry` — rev 1 -> 2 | 迁移测试至 tests/auth/test_session.py，同步修改 docs/testing-guide.md，实测 3 passed | sources=[tests/auth/test_session.py, docs/testing-guide.md]
+- `2026-11-20T07:43:40.471Z` **WRITE** `testing/temp-debug-note` — rev 1 | title="临时排查记录" | sources=[docs/testing-guide.md]
+- `2026-11-20T07:43:40.584Z` **DELETE** `testing/temp-debug-note` — 临时排查记录无长期复用价值，验证 delete 动作
+========================================================================
