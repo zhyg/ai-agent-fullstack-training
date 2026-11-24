@@ -33,7 +33,7 @@ GRADE = re.compile(
     r"作业等级：\s*(优秀|良好|不及格)\s*[（(](?:[^）)]*?暂评)?\s*(\d+(?:\.\d+)?)\s*分"
 )
 LIST_ITEM = re.compile(r"^[-*]\s+(.*)$")
-SCORE_IN_REMARK = re.compile(r"\d+(?:\.\d+)?\s*分|扣分|得分|总分|分数")
+SCORE_IN_REMARK = re.compile(r"\d+(?:\.\d+)?\s*分(?!钟)|扣分|得分|总分|分数")
 
 
 def positive_int(value: str) -> int:
@@ -73,7 +73,9 @@ def parse_feedback(path: Path) -> dict:
         raise ValueError(f"等级“{level_name}”与 {score} 分不一致")
     bullets = [section_bullets(text, title) for title in SECTIONS]
     remark_text = "\n".join(item for group in bullets for item in group)
-    if SCORE_IN_REMARK.search(remark_text):
+    # 检索算法的分数不是作业评分，只在校验时排除术语，提交原文不变。
+    score_check = re.sub(r"(?:RRF|BM25|相似度|检索)\s*分数", "", remark_text)
+    if SCORE_IN_REMARK.search(score_check):
         raise ValueError("评语不得包含分数；等级行的分数只用于本地校验，不写入平台")
     return {
         "record_id": int(submission.group(1)) if submission else None,
