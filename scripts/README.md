@@ -45,11 +45,20 @@ Referer 根据班级、文章 ID 和 SKU 自动生成，请求 ID 每次自动�
 先预览，确认无误后再提交：
 
 ```bash
+uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --list homework/week02/homework-list02-pending-20261124-185535.json
+uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --list homework/week02/homework-list02-pending-20261124-185535.json --apply
+```
+
+推荐使用 `--list` 指定本次提交快照（JSON 数组，每项含学号 `student_no` 和正整数记录号 `id`）。脚本只处理列表中的“学号＋记录号”，在学号同名及 `-submission<记录号>.md` 文件中按首行标记精确匹配，不按文件名后缀、修改时间或最大记录号猜测。支持同一学员在列表中有多次不同提交；`--student-no` 可进一步筛选列表中的学员。未匹配、匹配多份、列表重复或选中反馈解析失败时，整批退出，不提交任何记录。列表外的旧反馈即使格式不合法，也不会阻断本批次。
+
+不带 `--list` 时保留原有用法：
+
+```bash
 uv run scripts/update_homework_correct.py --week week02 --article-id 1025885
 uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --student-no G20261786020108 --apply
 ```
 
-脚本读取 `homework/<周>/<学号>.md`。这份文件首行没有记录号、且该学号只有一份带记录号的 `*-submission*` 反馈时，改用那一份，不改已归档的旧文件。有多份时不猜测，仍按缺少记录号退出。
+此模式读取 `homework/<周>/<学号>.md`，并不自动选择最新提交。这份文件首行没有记录号、且该学号只有一份带记录号的 `*-submission*` 反馈时，改用那一份，不改已归档的旧文件。有多份时不猜测，仍按缺少记录号退出。
 反馈须含 `作业等级：优秀（87分）` 这种等级和分数，以及“作业优点”“作业不足”“改进方案”三个 Markdown 列表。分数可以是整数或小数，如 `作业等级：优秀（81.64分）`。平台只提交等级。评语不得包含分数、扣分、得分或总分；等级行的分数只用于本地校验，不写入平台。
 等级按 80 / 60 分段核验：优秀为 8，良好为 4，不及格为 1。`不及格（暂评0分，待补证100分）` 取暂评分数，0 分映射为不及格。未计分的反馈会跳过并记为失败。
 
@@ -62,6 +71,7 @@ uv run scripts/update_homework_correct.py --week week02 --article-id 1025885 --s
 | `--week` | 无，必填 | 周次目录，如 `week02` |
 | `--article-id` / `--article_id` | 无，必填 | 文章 ID，正整数 |
 | `--class-id` / `--class_id` | `899` | 班级 ID，正整数 |
+| `--list` | 不使用列表 | 本次提交快照 JSON，按学号和记录号精确选取反馈；相对路径基于当前工作目录 |
 | `--student-no` | 全部学号 | 只处理该学号，可重复 |
 | `--apply` | 关闭 | 提交到平台；省略时只预览 |
 | `--include-corrected` | 关闭 | 连已批改（status 8）的记录也提交；默认核实后跳过 |

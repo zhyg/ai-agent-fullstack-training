@@ -96,8 +96,41 @@ def submission_feedback(week_dir: Path, student_no: str) -> Path | None:
     return None
 
 
-def load_feedbacks(week_dir: Path, selected: set[str]) -> tuple[dict[str, tuple[Path, dict]], list[str]]:
+def load_feedbacks(
+    week_dir: Path, selected: set[str], list_path: Path | None = None,
+) -> tuple[dict[tuple[str, int | None], tuple[Path, dict]], list[str]]:
     found, skipped = {}, []
+    if list_path is not None:
+        submissions = json.loads(list_path.read_text(encoding="utf-8"))
+        if not isinstance(submissions, list):
+            raise ValueError("提交列表必须是 JSON 数组")
+        for item in submissions:
+            if not isinstance(item, dict):
+                raise ValueError("提交列表每项必须包含 student_no 和正整数 id")
+            student_no, record_id = item.get("student_no"), item.get("id")
+            if (not isinstance(student_no, str) or not STUDENT_NO.fullmatch(student_no)
+                    or type(record_id) is not int or record_id <= 0):
+                raise ValueError("提交列表每项必须包含有效 student_no 和正整数 id")
+            if selected and student_no not in selected:
+                continue
+            key = (student_no, record_id)
+            if key in found:
+                raise ValueError(f"提交列表重复：{student_no} / {record_id}")
+            matches = []
+            for path in week_dir.glob(f"{student_no}*.md"):
+                if path.stem != student_no and not re.fullmatch(
+                    rf"{student_no}-submission\d+", path.stem
+                ):
+                    continue
+                marker = SUBMISSION.match(path.read_text(encoding="utf-8"))
+                if marker and int(marker.group(1)) == record_id:
+                    matches.append(path)
+            if len(matches) != 1:
+                raise ValueError(f"{student_no} / {record_id}：须恰好匹配一份反馈，实际 {len(matches)} 份")
+            path = matches[0]
+            found[key] = (path, parse_feedback(path))
+        return found, skipped
+
     for path in sorted(week_dir.glob("G*.md")):
         student_no = path.stem.split("-")[0]
         if not STUDENT_NO.fullmatch(student_no) or path.stem != student_no:
@@ -112,7 +145,7 @@ def load_feedbacks(week_dir: Path, selected: set[str]) -> tuple[dict[str, tuple[
         if feedback["record_id"] is None:
             later = submission_feedback(week_dir, student_no)
             if later is None:
-                found[student_no] = (path, feedback)
+                found[(student_no, feedback["record_id"])] = (path, feedback)
                 continue
             try:
                 feedback = parse_feedback(later)
@@ -120,7 +153,7 @@ def load_feedbacks(week_dir: Path, selected: set[str]) -> tuple[dict[str, tuple[
                 skipped.append(f"{later.relative_to(week_dir.parent.parent)}：{exc}")
                 continue
             path = later
-        found[student_no] = (path, feedback)
+        found[(student_no, feedback["record_id"])] = (path, feedback)
     return found, skipped
 
 
@@ -196,6 +229,7 @@ def main() -> int:
     parser.add_argument("--week", required=True, help="周次目录，如 week02")
     parser.add_argument("--article-id", "--article_id", type=positive_int, required=True)
     parser.add_argument("--class-id", "--class_id", type=positive_int, default=899)
+    parser.add_argument("--list", type=Path, help="本次提交列表 JSON，按 student_no 和 id 精确匹配反馈")
     parser.add_argument("--student-no", action="append", default=[], help="只处理该学号，可重复")
     parser.add_argument("--apply", action="store_true", help="提交到平台；省略时只预览")
     parser.add_argument(
@@ -220,12 +254,12 @@ def main() -> int:
         parser.error(f"目录不存在：homework/{args.week}")
     selected = set(args.student_no)
     try:
-        feedbacks, skipped = load_feedbacks(week_dir, selected)
-    except RuntimeError as exc:
+        feedbacks, skipped = load_feedbacks(week_dir, selected, args.list)
+    except (RuntimeError, OSError, ValueError) as exc:
         print(f"准备失败：{exc}", file=sys.stderr)
         return 1
 
-    unknown = sorted(selected - feedbacks.keys() - {item.split("/")[-1].split(".")[0].split("-")[0] for item in skipped})
+    unknown = sorted(selected - {sid for sid, _ in feedbacks} - {item.split("/")[-1].split(".")[0].split("-")[0] for item in skipped})
     if unknown:
         print(f"准备失败：没有这些学号的反馈：{', '.join(unknown)}", file=sys.stderr)
         return 1
@@ -250,7 +284,7 @@ def main() -> int:
     referer = (
         f"{ORIGIN}/review/lesson/{args.class_id}?article={args.article_id}&class_sku={CLASS_SKU}"
     )
-    for student_no, (path, feedback) in feedbacks.items():
+    for (student_no, _), (path, feedback) in feedbacks.items():
         label = f"{student_no} / {feedback['record_id'] or '未标注'} {feedback['level_name']}{feedback['score']}"
         try:
             record = select_submission(records, student_no, feedback["record_id"])
