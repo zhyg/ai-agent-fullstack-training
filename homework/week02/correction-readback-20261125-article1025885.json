@@ -1,0 +1,110 @@
+[
+  {
+    "student_no": "G20261786010571",
+    "record_id": 19536,
+    "feedback": "homework/week02/G20261786010571.md",
+    "score": 36.0,
+    "level_name": "不及格",
+    "status": 8,
+    "correct_level": 1,
+    "remark_matches": true,
+    "expected_remark_sha256": "a63a0fff1ad1b9eaa53145b6116971cdbb3775e7755e78376bfe8000c0b74a07",
+    "actual_remark_sha256": "a63a0fff1ad1b9eaa53145b6116971cdbb3775e7755e78376bfe8000c0b74a07"
+  },
+  {
+    "student_no": "G20261786010616",
+    "record_id": 19534,
+    "feedback": "homework/week02/G20261786010616.md",
+    "score": 100.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "78f56f417a0878ca0b7ef334a790d6d3a3d77cd5f60181aef51681e3ff9e4e1d",
+    "actual_remark_sha256": "78f56f417a0878ca0b7ef334a790d6d3a3d77cd5f60181aef51681e3ff9e4e1d"
+  },
+  {
+    "student_no": "G20247585010117",
+    "record_id": 19524,
+    "feedback": "homework/week02/G20247585010117.md",
+    "score": 97.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "3d70b14d5197cdcf3f01b046a7c2b20ed0ed4cebca8cfa2a7fd2e01c666af99a",
+    "actual_remark_sha256": "3d70b14d5197cdcf3f01b046a7c2b20ed0ed4cebca8cfa2a7fd2e01c666af99a"
+  },
+  {
+    "student_no": "G20261786010617",
+    "record_id": 19521,
+    "feedback": "homework/week02/G20261786010617.md",
+    "score": 88.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "c6b493d4b346cfb83d9af763062d7db0b89149f7c52dcbc87b0fd6b6a97d970c",
+    "actual_remark_sha256": "c6b493d4b346cfb83d9af763062d7db0b89149f7c52dcbc87b0fd6b6a97d970c"
+  },
+  {
+    "student_no": "G20261786020012",
+    "record_id": 19514,
+    "feedback": "homework/week02/G20261786020012.md",
+    "score": 97.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "662401e6de8242c452a40d36ef6a36083a2ce4250846dce8f10fa25085ded408",
+    "actual_remark_sha256": "662401e6de8242c452a40d36ef6a36083a2ce4250846dce8f10fa25085ded408"
+  },
+  {
+    "student_no": "G19701786020176",
+    "record_id": 19502,
+    "feedback": "homework/week02/G19701786020176.md",
+    "score": 97.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "5c1ec1682bc0fda0720bd3206524f7fbb58f5ad618aa7836909ba4f214a7aa7d",
+    "actual_remark_sha256": "5c1ec1682bc0fda0720bd3206524f7fbb58f5ad618aa7836909ba4f214a7aa7d"
+  },
+  {
+    "student_no": "G20261786020019",
+    "record_id": 19494,
+    "feedback": "homework/week02/G20261786020019.md",
+    "score": 2.0,
+    "level_name": "不及格",
+    "status": 8,
+    "correct_level": 1,
+    "remark_matches": true,
+    "expected_remark_sha256": "db660d64540d7ac7928fec500ec1f2d02cfae943ad764f982d8b8f186615b5c7",
+    "actual_remark_sha256": "db660d64540d7ac7928fec500ec1f2d02cfae943ad764f982d8b8f186615b5c7"
+  },
+  {
+    "student_no": "G20261786020031",
+    "record_id": 19489,
+    "feedback": "homework/week02/G20261786020031-submission19489.md",
+    "score": 43.0,
+    "level_name": "不及格",
+    "status": 8,
+    "correct_level": 1,
+    "remark_matches": true,
+    "expected_remark_sha256": "ba15eab149f0ae3648a1a947675cec5dd58bc54160c7069523f8d9d734e6787b",
+    "actual_remark_sha256": "ba15eab149f0ae3648a1a947675cec5dd58bc54160c7069523f8d9d734e6787b"
+  },
+  {
+    "student_no": "G20261786020140",
+    "record_id": 19479,
+    "feedback": "homework/week02/G20261786020140.md",
+    "score": 99.0,
+    "level_name": "优秀",
+    "status": 8,
+    "correct_level": 8,
+    "remark_matches": true,
+    "expected_remark_sha256": "4fcc48688f0f20e26351a0c1647cdf8f588e3a9df9227ebd4b7ec857bfad8087",
+    "actual_remark_sha256": "4fcc48688f0f20e26351a0c1647cdf8f588e3a9df9227ebd4b7ec857bfad8087"
+  }
+]
