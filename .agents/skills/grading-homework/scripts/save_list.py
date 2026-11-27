@@ -2,11 +2,10 @@
 """用 scripts/get_homework_user_list.py 获取作业提交列表，另存为带时间戳的新快照。
 
 用法：
+  python save_list.py --week week02 --article-id 1025885
   python save_list.py
-  python save_list.py --article-id 1025885
 
-省略 --article-id 时请求 article_id 为 null，一次取班级全部未批改作业，再按文章拆到对应周目录。
-指定文章时只保存该周。已有列表一律不改；目标文件已存在时报错退出。
+同时给出周次和文章时，只向该文章请求并写入该周目录。省略两者时请求 article_id 为 null，一次取全部未批改作业，再按文章拆到对应周目录。已有列表一律不改；目标文件已存在时报错退出。
 """
 
 import argparse
@@ -72,14 +71,16 @@ def write_snapshot(week: str, article_id: int, users: list[dict], counts: list[i
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--week", help="只保留该周；省略时按文章拆分全部未批改作业")
-    parser.add_argument("--article-id", type=int, help="只获取该文章；省略时获取全部作业")
+    parser.add_argument("--week", help="周次目录，如 week02；与 --article-id 一起用时只请求该文章")
+    parser.add_argument("--article-id", type=int, help="文章 ID；与 --week 一起用时只请求该文章")
     args = parser.parse_args()
     if args.week and not re.fullmatch(r"week\d{2}", args.week):
         sys.exit("--week 必须形如 week02")
+    if bool(args.week) != (args.article_id is not None):
+        sys.exit("按周取列表时同时提供 --week 和 --article-id；取全部作业时两者都省略")
     if args.article_id is not None and args.article_id not in WEEKS:
         sys.exit(f"文章 {args.article_id} 没有本地评分目录，不能保存为待批改快照")
-    if args.week and args.article_id and WEEKS[args.article_id] != args.week:
+    if args.week and WEEKS[args.article_id] != args.week:
         sys.exit(f"文章 {args.article_id} 属于 {WEEKS[args.article_id]}，与 --week {args.week} 不一致")
 
     users, counts, page = [], [], 1

@@ -5,20 +5,26 @@ description: 获取极客时间训练营全部未批改作业，按文章对应�
 
 # 批改训练营作业
 
-用户说“批改作业”且没有指定周次时，批改全部已有评分标准的未批改作业，不要再追问周次或 article ID。用户明确给出周次或 article ID 时，只批改那一份。
+用户说“批改作业”且没有指定周次时，批改全部已有评分标准的未批改作业，不要再追问周次或 article ID。用户同时给出周次和 article ID 时，只按该文章取列表并批改那一周。只给了其中一项时先问另一项，不要用对照表补全。
 
 文章与周次的对照固定为：`1009056` week01，`1025885` week02，`1025938` week03，`1028370` week04。平台上还有作业五 `1033055`、作业六 `1035502`，本地没有评分标准；只向用户列出，不批改、不归档，也不要猜标准。
 
 ## 1. 获取提交列表
 
 1. 需要 `GEEKBANG_COOKIE`（个人 Secrets）。脚本报缺 Cookie 时，先运行 `amp orb restart-processes` 刷新环境再重试；仍缺少就请用户配置，不要让用户把 Cookie 发到对话里。
-2. 批改全部作业时运行：
+2. 批改全部作业时不传文章，运行：
 
    ```bash
    python .agents/skills/grading-homework/scripts/save_list.py
    ```
 
-   只批改一周时仍可指定，例如 `--article-id 1025885` 或 `--week week02`。脚本用 `scripts/get_homework_user_list.py` 按默认 `status=0` 取列表。省略文章时请求体 `article_id` 为 `null`，一次返回班级全部作业，再按文章拆开。每份快照另存为 `homework/<周>/homework-list<NN>-pending-<时间戳>.{json,md}`。**已有列表一律不改**，只新增快照。记录 `status` 只有三个取值：1 已提交，2 批改后已提交，8 已批改。获取脚本再排除 8，所以快照里只有 1 和 2，都要批改。没有评分目录的文章不会写入快照。
+   用户给了周次和 article ID 时，沿用原来的取法，只请求该文章：
+
+   ```bash
+   python .agents/skills/grading-homework/scripts/save_list.py --week week02 --article-id 1025885
+   ```
+
+   脚本用 `scripts/get_homework_user_list.py` 按默认 `status=0` 取列表。省略文章时请求体 `article_id` 为 `null`，一次返回班级全部作业，再按文章拆开。指定文章时只向该文章逐页请求，写入对应周目录。每份快照另存为 `homework/<周>/homework-list<NN>-pending-<时间戳>.{json,md}`。**已有列表一律不改**，只新增快照。记录 `status` 只有三个取值：1 已提交，2 批改后已提交，8 已批改。获取脚本再排除 8，所以快照里只有 1 和 2，都要批改。没有评分目录的文章不会写入快照。
 3. 向用户报告各周记录数。有待批改时，用一张表列出周次、学员、学号、记录号；没有待批改时直接说明，不创建空批改线程。
 
 ## 2. 准备批改

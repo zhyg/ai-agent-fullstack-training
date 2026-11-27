@@ -45,11 +45,11 @@ installation: the examples use local files, SQLite, or Milvus Lite.
 获取 week02 的作业列表并批改，article=1025885
 ```
 
-只获取列表、暂不批改时，也可以直接运行脚本。省略参数会按文章拆到对应周目录：
+只获取列表、暂不批改时，也可以直接运行脚本。周次和文章 ID 一起用时只请求该文章；两者都省略时按文章拆到对应周目录：
 
 ```bash
+python .agents/skills/grading-homework/scripts/save_list.py --week week02 --article-id 1025885
 python .agents/skills/grading-homework/scripts/save_list.py
-python .agents/skills/grading-homework/scripts/save_list.py --article-id 1025885
 ```
 
 ### 处理流程
