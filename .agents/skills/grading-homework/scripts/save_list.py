@@ -39,18 +39,22 @@ def fetch(article_id: int | None, page: int) -> list[dict]:
     return json.loads(result.stdout)
 
 
-def write_snapshot(week: str, article_id: int, users: list[dict], counts: list[int], now: datetime) -> Path:
+def write_snapshot(week: str, article_id: int, users: list[dict], counts: list[int], now: datetime,
+                   split: bool) -> Path:
     out_dir = ROOT / "homework" / week
     out_dir.mkdir(parents=True, exist_ok=True)
     base = out_dir / f"homework-list{week[4:]}-pending-{now:%Y%m%d-%H%M%S}"
     with base.with_suffix(".json").open("x") as stream:
         stream.write(json.dumps(users, ensure_ascii=False, indent=2) + "\n")
 
+    method = (f"`uv run scripts/get_homework_user_list.py --page N`（article_id 为 null），逐页直到空页，再按 article_id {article_id} 拆出本周记录。"
+              if split else
+              f"`uv run scripts/get_homework_user_list.py --article-id {article_id} --page N`，逐页直到空页。")
     lines = [
         f"# {week} 作业提交列表（status=0 查询快照）", "",
         f"来源：https://u.geekbang.org/review/lesson/899?article={article_id}&class_sku=101178602",
         f"采集时间：{now.isoformat(timespec='seconds')}",
-        f"方法：`uv run scripts/get_homework_user_list.py --article-id {article_id} --page N`，逐页直到空页。",
+        f"方法：{method}",
         "范围：查询 status=0，平台返回全部记录。记录 status 只有 1 已提交、2 批改后已提交、8 已批改；脚本再排除 8，快照只留 1 和 2。",
         f"记录数：{len(users)}；各页数量：{counts}", "",
         "| 序号 | 学员 | 学号 | 记录 | 状态 | 链接 |", "|---:|---|---|---:|---:|---|",
@@ -110,7 +114,7 @@ def main() -> None:
     for article_id, records in grouped.items():
         # 指定文章时各页数量属于这次请求；全部作业是一次取回后再拆分。
         page_counts = counts if args.article_id is not None else [len(records)]
-        base = write_snapshot(WEEKS[article_id], article_id, records, page_counts, now)
+        base = write_snapshot(WEEKS[article_id], article_id, records, page_counts, now, args.article_id is None)
         print(base.with_suffix(".json").relative_to(ROOT))
         print(base.with_suffix(".md").relative_to(ROOT))
         print(f"{WEEKS[article_id]} 记录数 {len(records)}")

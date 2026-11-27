@@ -5,7 +5,7 @@ description: 把已归档的学员反馈回填到极客时间作业批改系统�
 
 # 回填批改记录
 
-按本次提交列表中的“学号＋记录号”选取已归档反馈，更新到 `https://u.geekbang.org/serv/v1/homework/correct`。脚本和字段规则在 [scripts/update_homework_correct.py](../../../scripts/update_homework_correct.py) 与 [scripts/README.md](../../../scripts/README.md)。回填按周执行：article ID 取自该周快照，`1009056` 为 week01，`1025885` 为 week02，`1025938` 为 week03，`1028370` 为 week04。一次批改产生多周快照时，每周用自己的 `--week`、`--article-id` 和 `--list` 各跑一次，不把不同周混进同一个列表。快照缺失或无法确定属于哪周时先问，不猜测。
+按本次提交列表中的“学号＋记录号”选取已归档反馈，更新到 `https://u.geekbang.org/serv/v1/homework/correct`。脚本和字段规则在 [scripts/update_homework_correct.py](../../../scripts/update_homework_correct.py) 与 [scripts/README.md](../../../scripts/README.md)。回填按周执行：article ID 取自该周快照 md 的“来源”行，与周次的对照以 [save_list.py](../grading-homework/scripts/save_list.py) 的 `WEEKS` 为准。一次批改产生多周快照时，每周用自己的 `--week`、`--article-id` 和 `--list` 各跑一次，不把不同周混进同一个列表。快照缺失或无法确定属于哪周时先问，不猜测。
 
 ## 流程
 
