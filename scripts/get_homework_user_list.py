@@ -26,11 +26,17 @@ def positive_int(value: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--article-id", "--article_id", type=positive_int, required=True)
+    parser.add_argument(
+        "--article-id",
+        "--article_id",
+        type=positive_int,
+        help="文章 ID；省略时请求 article_id 为 null，返回班级全部作业",
+    )
     parser.add_argument("--class-id", "--class_id", type=positive_int, default=899)
     parser.add_argument("--size", type=positive_int, default=200)
     parser.add_argument("--page", type=positive_int, default=1)
-    parser.add_argument("--status", type=int, default=0)
+    # 这是查询参数，不是记录字段。0 表示不筛选；记录本身的 status 只有 1、2、8。
+    parser.add_argument("--status", type=int, default=0, help="查询状态，默认 0 返回全部")
     args = parser.parse_args()
 
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -39,8 +45,9 @@ def main() -> int:
         parser.error("请在仓库根目录 .env 中设置 GEEKBANG_COOKIE")
 
     origin = "https://u.geekbang.org"
+    # 省略文章时走汇总入口；请求体里的 article_id 必须是 JSON null，不能省略该字段。
     query = urlencode({
-        "article": args.article_id,
+        "article": args.article_id if args.article_id is not None else 0,
         "class_sku": "101178602",
     })
     payload = {
@@ -80,7 +87,9 @@ def main() -> int:
         print("响应格式错误：data.list 必须是对象列表", file=sys.stderr)
         return 1
 
-    fields = ("id", "content", "status", "name", "student_no")
+    fields = ("id", "article_id", "content", "status", "name", "student_no")
+    # 记录 status 只有三个取值：1 已提交，2 批改后已提交，8 已批改。
+    # 查询参数 status=0 会返回全部记录，这里再排除已批改。
     users = [
         {field: item.get(field) for field in fields}
         for item in records

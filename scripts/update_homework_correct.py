@@ -185,8 +185,9 @@ def request_json(cookie: str, url: str, payload: dict, referer: str) -> dict:
     return result
 
 
-# 平台 status 8 是已批改。status=0 的列表包含全部记录，每条自带当前 status，
-# 所以按记录号核实以这份列表为准，不另查 status=8，避免同一记录匹配到两次。
+# 记录 status 只有三个取值：1 已提交，2 批改后已提交，8 已批改。
+# 查询参数 status=0 返回全部记录，每条自带当前 status；
+# 按记录号核实以这份列表为准，不另查 status=8，避免同一记录匹配到两次。
 CORRECTED_STATUS = 8
 
 

@@ -16,7 +16,7 @@ description: 获取极客时间训练营某周作业提交列表，并按 hw-gui
    python .agents/skills/grading-homework/scripts/save_list.py --week week02 --article-id 1025885
    ```
 
-   脚本用 `scripts/get_homework_user_list.py` 按默认 `status=0` 逐页取到空页，另存为 `homework/<周>/homework-list<NN>-pending-<时间戳>.{json,md}`。**已有列表一律不改**，只新增快照。平台 `status=0` 的响应包含全部记录：1 已提交，2 批改后提交，8 已批改。获取脚本再排除 `status` 为 8 的记录，所以快照里只有 1 和 2，都要批改。
+   脚本用 `scripts/get_homework_user_list.py` 按默认 `status=0` 逐页取到空页，另存为 `homework/<周>/homework-list<NN>-pending-<时间戳>.{json,md}`。**已有列表一律不改**，只新增快照。平台 `status=0` 的响应包含全部记录。记录 `status` 只有三个取值：1 已提交，2 批改后已提交，8 已批改。获取脚本再排除 8，所以快照里只有 1 和 2，都要批改。
 3. 向用户报告记录数，以带“学员 | 学号 | 记录号”的表格列出。
 
 ## 2. 准备批改

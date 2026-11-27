@@ -6,6 +6,7 @@
 cp scripts/.env.example .env
 # 编辑 .env，填写有效的 GEEKBANG_COOKIE。
 uv run scripts/get_homework_user_list.py --article-id 1025885
+uv run scripts/get_homework_user_list.py
 ```
 
 脚本使用 Python 3.10+，`uv run` 会自动安装 `python-dotenv`。也可以自行安装
@@ -13,11 +14,11 @@ uv run scripts/get_homework_user_list.py --article-id 1025885
 
 | 参数 | 默认值 | 说明 |
 | --- | --- | --- |
-| `--article-id` / `--article_id` | 无，必填 | 文章 ID，正整数 |
+| `--article-id` / `--article_id` | 省略 | 文章 ID，正整数。省略时请求体 `article_id` 为 `null`，返回该班级全部作业 |
 | `--class-id` / `--class_id` | `899` | 班级 ID，正整数 |
 | `--size` | `200` | 每页数量，正整数 |
 | `--page` | `1` | 页码，正整数 |
-| `--status` | `0` | 作业状态，沿用原请求 |
+| `--status` | `0` | 查询参数，默认 0 返回全部。记录本身的 `status` 只有 1 已提交、2 批改后已提交、8 已批改 |
 
 例如指定班级、每页数量和页码：
 
@@ -32,9 +33,9 @@ uv run scripts/get_homework_user_list.py --article-id 1025885 --class-id 899 --s
 Referer 根据班级、文章 ID 和 SKU 自动生成，请求 ID 每次自动生成。
 浏览器专用的 `sec-*` 等请求头不需要复制。
 
-脚本遍历响应中的 `data.list`，跳过 `status` 等于数字 `8` 的记录。
-标准输出为格式化的 JSON 数组，每条记录仅保留
-`id`、`content`、`status`、`name`、`student_no` 五个字段。缺失字段输出为 `null`，
+脚本遍历响应中的 `data.list`。记录 `status` 只有 1（已提交）、2（批改后已提交）、8（已批改），脚本跳过 8。
+标准输出为格式化的 JSON 数组，每条记录保留
+`id`、`article_id`、`content`、`status`、`name`、`student_no`。缺失字段输出为 `null`，
 空列表输出为 `[]`，可以用 `> users.json` 保存。
 脚本只请求指定的一页，不自动翻页。HTTP、网络、JSON 解析失败或响应中的
 `data.list` 不是对象列表时退出码为 1；参数错误或缺少 Cookie 时退出码为 2。
