@@ -29,7 +29,7 @@ installation: the examples use local files, SQLite, or Milvus Lite.
 
 ## 作业批改 Skill
 
-仓库内置 Amp skill [`grading-homework`](./.agents/skills/grading-homework/SKILL.md)，用于获取某周作业的提交列表，并按本周评分标准逐份批改、归档。
+仓库内置 Amp skill [`grading-homework`](./.agents/skills/grading-homework/SKILL.md)，用于获取全部未批改作业，并按各周评分标准逐份批改、归档。
 
 ### 使用前准备
 
@@ -39,21 +39,22 @@ installation: the examples use local files, SQLite, or Milvus Lite.
 
 ### 使用方法
 
-在 Amp 线程中提供**周次**和 **article ID**，例如：
+在 Amp 线程中说“批改作业”，即批改全部已有评分标准的未批改作业。只批改一周时再给出周次或 article ID，例如：
 
 ```text
 获取 week02 的作业列表并批改，article=1025885
 ```
 
-只获取列表、暂不批改时，也可以直接运行脚本：
+只获取列表、暂不批改时，也可以直接运行脚本。省略参数会按文章拆到对应周目录：
 
 ```bash
-python .agents/skills/grading-homework/scripts/save_list.py --week week02 --article-id 1025885
+python .agents/skills/grading-homework/scripts/save_list.py
+python .agents/skills/grading-homework/scripts/save_list.py --article-id 1025885
 ```
 
 ### 处理流程
 
-1. **获取列表**：调用 `scripts/get_homework_user_list.py`（默认 `status=0`，排除已批改的 8），逐页取到空页，另存为 `homework/<周次>/homework-list<NN>-pending-<时间戳>.{json,md}`。已有列表不会被修改。
+1. **获取列表**：调用 `scripts/get_homework_user_list.py`（默认 `status=0`，排除已批改的 8）。不指定文章时一次取全部作业，再按文章拆成 `homework/<周次>/homework-list<NN>-pending-<时间戳>.{json,md}`。已有列表不会被修改。作业五、作业六尚无评分标准，只列出不批改。
 2. **独立批改**：每份提交新开一个 orb，克隆学员 Git 仓库，基于学员代码批改；同时最多运行 5 个。
 3. **统一复核**：主线程复核每份评分，保证同类问题在不同学员间扣分一致；必要时要求对应线程修订。
 4. **归档**：运行 `scripts/archive.py` 将结果写入 `homework/<周次>/`。
